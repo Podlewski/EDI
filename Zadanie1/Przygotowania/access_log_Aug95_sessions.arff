@@ -1,0 +1,130 @@
+@relation .\access_log_Aug95
+@attribute user string
+@attribute duration real
+@attribute requests_count integer
+@attribute avg_request_duration real
+@attribute / {True, False}
+@attribute /ksc.html {True, False}
+@attribute /shuttle/missions/missions.html {True, False}
+@attribute /shuttle/countdown/ {True, False}
+@attribute /shuttle/missions/sts-70/mission-sts-70.html {True, False}
+@attribute /images/ {True, False}
+@attribute /history/apollo/apollo-13/apollo-13.html {True, False}
+@attribute /shuttle/countdown/liftoff.html {True, False}
+@attribute /history/apollo/apollo.html {True, False}
+@attribute /history/history.html {True, False}
+@attribute /shuttle/missions/sts-69/mission-sts-69.html {True, False}
+@attribute /software/winvn/winvn.html {True, False}
+@attribute /shuttle/countdown/countdown.html {True, False}
+@attribute /facilities/lc39a.html {True, False}
+@attribute /htbin/cdt_main.pl {True, False}
+@attribute /shuttle/missions/sts-70/images/images.html {True, False}
+@attribute /shuttle/technology/sts-newsref/stsref-toc.html {True, False}
+@attribute /shuttle/resources/orbiters/discovery.html {True, False}
+@attribute /shuttle/missions/sts-71/movies/movies.html {True, False}
+@attribute /shuttle/missions/sts-71/mission-sts-71.html {True, False}
+@attribute /shuttle/missions/sts-71/images/images.html {True, False}
+@attribute /history/apollo/apollo-11/apollo-11.html {True, False}
+@attribute /shuttle/missions/sts-70/movies/movies.html {True, False}
+@attribute /shuttle/missions/sts-68/mission-sts-68.html {True, False}
+@attribute /history/apollo/apollo-13/apollo-13-info.html {True, False}
+@attribute /shuttle/countdown/lps/fr.html {True, False}
+@attribute /shuttle/resources/orbiters/endeavour.html {True, False}
+@attribute /shuttle/technology/sts-newsref/sts_asm.html {True, False}
+@attribute /facts/about_ksc.html {True, False}
+@attribute /htbin/cdt_clock.pl {True, False}
+@attribute /history/apollo/apollo-13/images/ {True, False}
+@attribute /facilities/mlp.html {True, False}
+@attribute /history/apollo/apollo-12/ {True, False}
+@attribute /history/apollo/apollo-13/movies/ {True, False}
+@attribute /shuttle/missions/sts-66/mission-sts-66.html {True, False}
+@attribute /shuttle/missions/sts-72/mission-sts-72.html {True, False}
+@attribute /shuttle/missions/sts-70/movies/woodpecker.mpg {True, False}
+@attribute /shuttle/resources/orbiters/columbia.html {True, False}
+@data
+'in24.inetnebr.com',821.0,16,51.3125,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,True,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+'in24.inetnebr.com',938.0,24,39.083333333333336,False,False,True,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,True,False,False,False,False,False,False,False,True,False,False,False,False,False,False
+'133.43.96.45',1245.0,9,138.33333333333334,False,False,True,False,False,False,True,False,True,False,True,False,False,True,False,False,False,False,False,False,False,False,False,True,False,False,True,False,False,False,False,True,False,False,False,True,False,False
+'uplherc.upl.com',1112.0,18,61.77777777777778,True,True,True,True,True,False,True,False,True,False,True,False,False,True,False,False,True,True,False,True,True,False,False,True,False,False,True,True,False,False,False,True,False,False,True,True,False,False
+'www-c3.proxy.aol.com',366.0,3,122.0,True,True,True,True,True,True,True,False,True,False,True,False,False,True,True,True,True,True,False,True,True,False,False,True,False,False,True,True,False,False,False,True,False,False,True,True,False,False
+'www-c3.proxy.aol.com',208.0,4,52.0,True,True,True,True,True,True,True,True,True,False,True,False,False,True,True,True,True,True,False,True,True,False,False,True,False,False,True,True,False,False,False,True,False,False,True,True,False,False
+'www-d3.proxy.aol.com',730.0,6,121.66666666666667,True,True,True,True,True,True,True,True,True,True,True,False,False,True,True,True,True,True,True,True,True,False,False,True,False,False,True,True,False,False,False,True,False,False,True,True,False,False
+'www-d3.proxy.aol.com',78.0,3,26.0,True,True,True,True,True,True,True,True,True,True,True,False,False,True,True,True,True,True,True,True,True,False,False,True,False,False,True,True,False,False,False,True,False,False,True,True,False,False
+'piweba4y.prodigy.com',201.0,3,67.0,True,True,True,True,True,True,True,True,True,True,True,False,False,True,True,True,True,True,True,True,True,False,False,True,False,False,True,True,False,False,False,True,False,False,True,True,False,False
+'endeavor.fujitsu.co.jp',0.0,1,0.0,True,True,True,True,True,True,True,True,True,True,True,False,False,True,True,True,True,True,True,True,True,False,False,True,False,True,True,True,False,False,False,True,False,False,True,True,False,False
+'ai.asu.edu',10.0,3,3.3333333333333335,True,True,True,True,True,True,True,True,True,True,True,False,True,True,True,True,True,True,True,True,True,False,True,True,True,True,True,True,True,False,False,True,False,True,True,True,True,False
+'ai.asu.edu',12.0,3,4.0,True,True,True,True,True,True,True,True,True,True,True,False,True,True,True,True,True,True,True,True,True,False,True,True,True,True,True,True,True,False,False,True,False,True,True,True,True,False
+'ai.asu.edu',9.0,3,3.0,True,True,True,True,True,True,True,True,True,True,True,False,True,True,True,True,True,True,True,True,True,False,True,True,True,True,True,True,True,False,False,True,False,True,True,True,True,False
+'piweba3y.prodigy.com',233.0,3,77.66666666666667,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,False,True,True,True,True,True,True,True,False,False,True,False,True,True,True,True,False
+'piweba3y.prodigy.com',772.0,5,154.4,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,False,False,True,False,True,True,True,True,False
+'piweba3y.prodigy.com',56.0,2,28.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,False,False,True,False,True,True,True,True,True
+'piweba3y.prodigy.com',80.0,2,40.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,False,False,True,False,True,True,True,True,True
+'piweba3y.prodigy.com',0.0,1,0.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,False,False,True,False,True,True,True,True,True
+'www-b5.proxy.aol.com',65.0,4,16.25,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,False,False,True,False,True,True,True,True,True
+'www-b5.proxy.aol.com',199.0,7,28.428571428571427,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,False,False,True,False,True,True,True,True,True
+'www-b5.proxy.aol.com',0.0,1,0.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,False,False,True,False,True,True,True,True,True
+'www-b5.proxy.aol.com',0.0,1,0.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,False,False,True,False,True,True,True,True,True
+'dd09-012.compuserve.com',834.0,7,119.14285714285714,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,False,False,True,False,True,True,True,True,True
+'128.159.129.170',470.0,2,235.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,False,False,True,False,True,True,True,True,True
+'www-b3.proxy.aol.com',0.0,1,0.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,False,False,True,False,True,True,True,True,True
+'www-b3.proxy.aol.com',0.0,1,0.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,False,False,True,False,True,True,True,True,True
+'www-b3.proxy.aol.com',506.0,8,63.25,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,False,False,True,False,True,True,True,True,True
+'ppp3_069.bekkoame.or.jp',225.0,4,56.25,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,False,False,True,False,True,True,True,True,True
+'blv-pm11-ip17.halcyon.com',197.0,3,65.66666666666667,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,False,False,True,False,True,True,True,True,True
+'cs1-08.leh.ptd.net',954.0,8,119.25,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,False,False,True,False,True,True,True,True,True
+'www-c6.proxy.aol.com',30.0,2,15.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,False,False,True,False,True,True,True,True,True
+'www-c6.proxy.aol.com',0.0,1,0.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,False,False,True,False,True,True,True,True,True
+'cherry.hip.berkeley.edu',0.0,1,0.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,False,False,True,False,True,True,True,True,True
+'grail911.nando.net',0.0,1,0.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,False,False,True,False,True,True,True,True,True
+'ix-min1-02.ix.netcom.com',184.0,17,10.823529411764707,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,False,False,True,True,True,True,True,True,True
+'www-c1.proxy.aol.com',0.0,1,0.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,False,True,True,True,True,True,True,True,True
+'adam.tower.com.au',945.0,9,105.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,False,True,True,True,True,True,True,True,True
+'168.78.14.166',206.0,3,68.66666666666667,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'199.190.95.40',98.0,3,32.666666666666664,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'www-b2.proxy.aol.com',0.0,1,0.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'www-b2.proxy.aol.com',0.0,1,0.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'www-b2.proxy.aol.com',59.0,2,29.5,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'www-b2.proxy.aol.com',190.0,2,95.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'www-a1.proxy.aol.com',93.0,2,46.5,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'www-a1.proxy.aol.com',1568.0,6,261.3333333333333,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'www-a1.proxy.aol.com',0.0,1,0.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'www-a1.proxy.aol.com',0.0,1,0.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'www-a1.proxy.aol.com',94.0,3,31.333333333333332,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'205.161.163.25',69.0,2,34.5,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'miriworld.its.unimelb.edu.au',0.0,1,0.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'info.telenor.no',349.0,6,58.166666666666664,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'kctm.kagoshima-ct.ac.jp',1247.0,6,207.83333333333334,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'wyndmoor1-7.slip.netaxs.com',118.0,3,39.333333333333336,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'wwwproxy.info.au',340.0,3,113.33333333333333,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'alyssa.prodigy.com',0.0,1,0.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'cs1-06.leh.ptd.net',807.0,6,134.5,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'fp590.acs.ohio-state.edu',38.0,2,19.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'www-c4.proxy.aol.com',67.0,2,33.5,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'www-c4.proxy.aol.com',0.0,1,0.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'dd12-003.compuserve.com',66.0,3,22.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'ip55.van2.pacifier.com',1792.0,11,162.9090909090909,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'ip55.van2.pacifier.com',76.0,4,19.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'rickc.seanet.com',0.0,1,0.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'maui56.maui.net',267.0,4,66.75,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'www-d4.proxy.aol.com',0.0,1,0.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'www-d2.proxy.aol.com',215.0,3,71.66666666666667,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'tyo1.gate.nec.co.jp',0.0,1,0.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'thing1.cchem.berkeley.edu',228.0,6,38.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'dd08-050.compuserve.com',1050.0,9,116.66666666666667,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'pppa006.compuserve.com',684.0,5,136.8,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'dws.urz.uni-magdeburg.de',319.0,3,106.33333333333333,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'empedocles.cfar.umd.edu',0.0,1,0.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'castles10.castles.com',112.0,3,37.333333333333336,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'bettong.client.uq.oz.au',671.0,7,95.85714285714286,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'ad11-013.compuserve.com',0.0,1,0.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'ncg-72.axionet.com',0.0,1,0.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'ncg-72.axionet.com',0.0,1,0.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'198.189.70.111',32.0,2,16.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'198.189.70.111',59.0,3,19.666666666666668,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'mfyip.ct.creaf.com',0.0,1,0.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'ix-pl1-08.ix.netcom.com',101.0,3,33.666666666666664,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'se.eorc.nasda.go.jp',563.0,9,62.55555555555556,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'iller.df.op.dlr.de',0.0,1,0.0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'ottodix.miks3.iao.fhg.de',803.0,20,40.15,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'ircgate1.rcc-irc.si',81.0,2,40.5,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
+'mpngate1.ny.us.ibm.net',267.0,7,38.142857142857146,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True

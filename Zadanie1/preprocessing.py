@@ -104,6 +104,12 @@ sessions_df_pages.to_csv(file_name + '_sessions_pages.csv', index=False)
 arff.dump(file_name + '_sessions_pages.arff', sessions_df_pages.values,
           relation=file_name, names=sessions_df_pages.columns)
 
+sessions_df_numeric = sessions_df[['duration', 'requests_count', 'avg_request_duration']]
+sessions_df_numeric = sessions_df_numeric.astype(object)
+sessions_df_numeric.to_csv(file_name + '_sessions_numeric.csv', index=False)
+arff.dump(file_name + '_sessions_numeric.arff', sessions_df_numeric.values,
+          relation=file_name, names=sessions_df_numeric.columns)
+
 users_df_pages = users_df.drop(columns=['requests_count'])
 users_df_pages = users_df_pages.astype(object)
 users_df_pages.to_csv(file_name + '_users_pages.csv', index=False)

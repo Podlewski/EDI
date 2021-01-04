@@ -1,0 +1,4 @@
+Out 	-> 	plik arff dla domeny https://ftims.p.lodz.pl
+Out_ul 	-> 	plik arff dla domeny https://www.uni.lodz.pl
+
+Plik jest wynikiem dzia³ania aplikacji o nazwie plainToArff.py

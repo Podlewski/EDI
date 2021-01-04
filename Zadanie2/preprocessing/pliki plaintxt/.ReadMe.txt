@@ -1,0 +1,4 @@
+concatenate_text	-> 	plik txt (plainText) dla domeny https://ftims.p.lodz.pl
+ul			-> 	plik txt (plainText) dla domeny https://www.uni.lodz.pl
+
+Plik jest wynikiem dzia³ania aplikacji o nazwie ConvertHTMLtoPLAINtxt.py

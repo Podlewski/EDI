@@ -1,0 +1,5 @@
+Output 		-> 	plik csv dla domeny https://ftims.p.lodz.pl
+Output_ul 	-> 	plik csv dla domeny https://www.uni.lodz.pl
+
+Plik jest wynikiem dzia³ania aplikacji o nazwie plainToArff.py
+Jest to dodatkowy element.

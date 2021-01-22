@@ -1,5 +1,10 @@
-# Log Files
+# generated files
 access_log_Aug95
+access_log_Jul95
+Zadanie1/*.csv
+Zadanie1/*/*.csv
+Zadanie1/*.arff
+Zadanie1/*/*.arff
 
 
 # Byte-compiled / optimized / DLL files

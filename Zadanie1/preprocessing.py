@@ -37,7 +37,8 @@ df['bytes'].fillna(0, inplace=True)
 df['bytes'] = df['bytes'].astype('int64')
 
 df = df[df['method'] == 'GET']
-df = df[df['status'] == '200']
+df['status'] = pd.to_numeric(df['status'], errors='coerce', downcast='integer').fillna(0).astype(int)
+df = df[df['status'] == 200]
 df.drop(df[df['url'].str.contains('.jpg|.gif|.bmp|.xbm|.png|.jpeg')].index, inplace=True)
 
 unique_users = df['host'].unique() 

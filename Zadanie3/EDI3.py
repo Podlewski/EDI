@@ -13,6 +13,7 @@ import pandas
 # How To?!
 # EDI3.py 5 T -> 5 klastrów, uzytkownik randomowy - True- tworzy losowego uzytkownika
 # EDI3.py 8 F -> 8 klastrów, uzytkownik randomowy - False - stały uzytkownik
+# EDI3.py -1 F -> klastry użytkonika, plik: ./clusters/cluster_custom.csv , uzytkownik randomowy - False - stały uzytkownik
 
 n_cl = int(sys.argv[1])#int(input("Ilość klastrów(5, 8, 13): "))
 user_arg = sys.argv[2]
@@ -23,6 +24,8 @@ elif n_cl == 8:
     cluster_source = "./clusters/cluster8.csv"
 elif n_cl == 13:
     cluster_source = "./clusters/cluster13.csv"
+elif n_cl == -1:
+    cluster_source = "./clusters/cluster_custom.csv"
 else:
     print("error")
     sys.exit()

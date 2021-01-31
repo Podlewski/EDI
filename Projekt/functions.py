@@ -2,18 +2,18 @@ import math
 import numpy as np
 
 
-def get_random_pattern(image, pattern_width, patterns_number):
+def get_random_patterns(image, pattern_width, patterns_number):
     patterns = []
-    patterns_indexes = []
-    
+    patterns_indexes = []  
     image_width = len(image[0])
-    max_reduced_index = image_width / pattern_width
-    if not max_reduced_index.is_integer():
-        raise ValueError(f'Incorrect pattern width ({max_reduced_index}) - required image width divider.')
+
+    img_pattern_ratio = image_width / pattern_width
+    if not img_pattern_ratio.is_integer():
+        raise ValueError(f'Incorrect pattern width ({img_pattern_ratio}) - required image width divider.')
     
     while len(patterns) < patterns_number:
-        row_index = np.random.randint(0, max_reduced_index) * pattern_width
-        col_index = np.random.randint(0, max_reduced_index) * pattern_width
+        row_index = np.random.randint(0, image_width - pattern_width + 1)
+        col_index = np.random.randint(0, image_width - pattern_width + 1)
         if [row_index, col_index] not in patterns_indexes:
             patterns_indexes.append([row_index, col_index])
             pattern = image[row_index : row_index + pattern_width,
@@ -25,9 +25,10 @@ def get_random_pattern(image, pattern_width, patterns_number):
 def get_all_patterns(image, pattern_width):
     patterns = []
     image_width = len(image[0])
-    max_reduced_index = image_width / pattern_width
-    if not max_reduced_index.is_integer():
-        raise ValueError(f'Incorrect pattern width ({max_reduced_index}) - required image width divider.')
+
+    img_pattern_ratio = image_width / pattern_width
+    if not img_pattern_ratio.is_integer():
+        raise ValueError(f'Incorrect pattern width ({img_pattern_ratio}) - required image width divider.')
 
     row = 0
     while row < image_width:
@@ -41,12 +42,28 @@ def get_all_patterns(image, pattern_width):
     return patterns
 
 
-def normalize_from_pixels(arraylike):
-    return arraylike / 255
+def get_pixels_mean_std(arraylike):
+    array = arraylike.ravel()
+    print(array(len))
 
 
-def normalize_to_pixels(arraylike):
-    return arraylike * 255
+def rescale_from_pixels(arraylike):
+    return arraylike / 255 * 2 - 1
+
+
+def rescale_to_pixels(arraylike):
+    arraylike = np.clip(arraylike, -1, 1)
+    return (arraylike + 1) * 255 / 2
+
+
+def get_cr(image_width, hidden_neurones, pattern_width):
+    BITS_IN_BYTE = 8
+    BITS_TO_REMEMBER_HIDDEN_FACTOR = 12
+    BITS_TO_REMEMBER_WEIGHT = 8
+    pattern_pixels = pattern_width * pattern_width
+    return (BITS_IN_BYTE * image_width * image_width) / \
+        (pattern_pixels * hidden_neurones * BITS_TO_REMEMBER_WEIGHT +
+         hidden_neurones * BITS_TO_REMEMBER_HIDDEN_FACTOR)
 
 
 def get_psnr(orginal_image, reduced_image):

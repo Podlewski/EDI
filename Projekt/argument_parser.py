@@ -24,11 +24,11 @@ class ArgumentParser:
 
         self.parser.add_argument('-l', metavar='RATE', dest='learning_rate',
                                  type=float, default=0.01,
-                                 help='Learning rate')                               
+                                 help='Learning rate')                             
 
         self.parser.add_argument('-k', metavar='K', dest='patterns_number',
-                                 type=int, default=512,
-                                 help='Number of patterns')     
+                                 type=int, default=10000,
+                                 help='Number of patterns (big numbers works best)')     
 
         self.parser.add_argument('-w', metavar='W', dest='pattern_width',
                                  type=int, default=8,
@@ -46,6 +46,8 @@ class ArgumentParser:
         self.args = self.parser.parse_args()
 
     def get_args(self):
+        self.args.chart_name = '_'.join(map(lambda path : path.split('/')[-1].replace('.bmp', ''), self.args.training_images))
+
         self.args.short_test_images = [f for f in listdir(self.args.test_images_folder) \
             if path.isfile(path.join(self.args.test_images_folder, f))]
         self.args.test_images = [self.args.test_images_folder + f \

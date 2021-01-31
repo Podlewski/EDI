@@ -45,7 +45,7 @@ for neurones in args.neurones:
         img = Image.fromarray(img)
         if img.mode != 'L':
             img = img.convert('L')
-        img.save('res/' + str(neurones) + '/out_' + args.short_test_images[i])
+        img.save('res/' + args.chart_name + '/' + str(neurones) + '/out_' + args.short_test_images[i])
 
         results[args.short_test_images[i]][cr] = [psnr]
 

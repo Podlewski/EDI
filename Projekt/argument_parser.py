@@ -34,19 +34,20 @@ class ArgumentParser:
                                  type=int, default=8,
                                  help='Pattern width') 
 
-        self.parser.add_argument('--training-img', metavar='PATH',
+        self.parser.add_argument('-t', metavar='PATH',
                                  dest='training_images', type=str, nargs='+',
                                  default=['./img/01.bmp', './img/03.bmp'],
                                  help='Training images')
 
-        self.parser.add_argument('--test-img-folder', metavar='PATH',
+        self.parser.add_argument('-f', metavar='PATH',
                                  dest='test_images_folder', type=str,
                                  default='./img/', help='Test images folder')
 
         self.args = self.parser.parse_args()
 
     def get_args(self):
-        self.args.chart_name = '_'.join(map(lambda path : path.split('/')[-1].replace('.bmp', ''), self.args.training_images))
+        self.args.chart_name = '_'.join(map(lambda path : path.replace('\\', '/') \
+            .split('/')[-1].replace('.bmp', ''), self.args.training_images))
 
         self.args.short_test_images = [f for f in listdir(self.args.test_images_folder) \
             if path.isfile(path.join(self.args.test_images_folder, f))]
@@ -55,7 +56,7 @@ class ArgumentParser:
             if path.isfile(path.join(self.args.test_images_folder, f))]
 
         for i in self.args.neurones:
-            if not path.exists('res/' + str(i)):
-                makedirs('res/' + str(i))
+            if not path.exists('res/' + self.args.chart_name +'/' + str(i)):
+                makedirs('res/' + self.args.chart_name +'/' + str(i))
 
         return self.args

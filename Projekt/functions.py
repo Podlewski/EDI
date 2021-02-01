@@ -60,10 +60,11 @@ def get_cr(image_width, hidden_neurones, pattern_width):
     BITS_IN_BYTE = 8
     BITS_TO_REMEMBER_HIDDEN_FACTOR = 12
     BITS_TO_REMEMBER_WEIGHT = 8
-    pattern_pixels = pattern_width * pattern_width
+    in_out_neurones = pattern_width * pattern_width
     return (BITS_IN_BYTE * image_width * image_width) / \
-        (pattern_pixels * hidden_neurones * BITS_TO_REMEMBER_WEIGHT +
-         hidden_neurones * BITS_TO_REMEMBER_HIDDEN_FACTOR)
+        (in_out_neurones * hidden_neurones * BITS_TO_REMEMBER_WEIGHT +
+         hidden_neurones * BITS_TO_REMEMBER_HIDDEN_FACTOR + 
+         hidden_neurones * in_out_neurones * BITS_TO_REMEMBER_WEIGHT)
 
 
 def get_psnr(orginal_image, reduced_image):

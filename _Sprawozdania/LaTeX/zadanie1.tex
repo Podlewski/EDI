@@ -1,0 +1,806 @@
+\documentclass{classrep}
+\usepackage[utf8]{inputenc}
+\frenchspacing
+
+\usepackage{graphicx}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage[hidelinks]{hyperref}
+\usepackage{float}
+\usepackage{setspace}
+\usepackage{amsmath, amssymb, mathtools}
+
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{pdflscape}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%%%%%%%%%% TRYB DRAFTU
+\setkeys{Gin}{draft=True}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\setlength{\abovecaptionskip}{-10pt}
+
+\studycycle{Informatyka stosowana, studia dzienne, II st.}
+\coursesemester{II}
+\coursename{Eksploracja danych internetowych}
+\courseyear{2020/2021}
+
+\courseteacher{dr inż. Krzysztof Myszkorowski}
+\coursegroup{poniedziałek, 10:00}
+
+\author{%
+  \studentinfo{Paweł Jeziorski}{234066}\\
+  \studentinfo{Karol Podlewski}{234106}%
+}
+
+\title{Ćwiczenie 1: Eksploracja użycia na podstawie pliku logów}
+
+\begin{document}
+\maketitle
+
+\setstretch{1.5}
+
+\tableofcontents
+\setstretch{1.25}
+\newpage
+
+\section{Cel}
+
+Celem zadania było przeprowadzenie analizy pliku logów. Plik logów w formacie Common Log Format należało przygotować do analizy w programie Weka poprzez wyodrębnienie i grupowanie użytkowników oraz sesji. Kolejnym krokiem było zbudowanie reguł asocjacyjnych dla tych grup.
+
+W ramach tego ćwiczenia skorzystano z pliku logów \verb|access_log_Aug95|, który jest dostępny do pobrania pod następującym adresem: \url{ftp://ita.ee.lbl.gov/traces/NASA\_access\_log\_Aug95.gz}.
+
+\section{Przygotowanie danych}
+
+    \subsection{Opis pliku logów}
+    
+    Plik \verb|access_log_Aug95| jest typowym plikiem logów stworzonym w formacie Common Log Format. 
+
+    \begin{figure}[H] 
+    	\begin{center}
+    	\frame{\includegraphics[width=1\textwidth]{zad1/logfile.png}}
+        \caption{Pierwsze 10 linii pliku logów}
+    	\end{center}
+    \end{figure}
+
+    Plik logów zawiera informacje o hoście, nazwie użytkownika podczas uwierzytelniania oraz w systemie klienta, znacznik czasu, pierwszy wiersz nagłówka żądania HTTP, status obsługi tego żądania oraz rozmiar odpowiedzi w bajtach. 
+    
+    Bardzo częstym zjawiskiem jest brak informacji w 2 oraz 3 kolumnie - są one powiązane z uwierzytelnianiem do systemu, co nie jest zawsze wymagane. Właśnie taka sytuacja ma miejsce dla pliku \verb|access_log_Aug95|.
+    
+    \subsection{Przetworzenie pliku}
+
+    W celu przetworzenia pliku logów stworzono skrypt \verb|preprocessing.py| w języku python, w wersji 3.7.9, z wykorzystaniem biblioteki pandas.
+    
+    Wczytano 50 000 linii z pominięciem 2 oraz 3 kolumny, które nie zawierały żadnych informacji. Następnie przetworzono wszystkie zmienne wczytane jako ciąg znaków w celu wyodrębnienia z nich kluczowych informacji, takich jak metodę i url żądania HTTP oraz znacznik czasu. Następnie rekordy ograniczono do tych, które zawierały metodę GET, status odpowiedzi wynosił 200 oraz zapytanie nie było związane z plikami graficznymi (formaty jpg, gif, bmp, xbm, png oraz jpeg). Stworzono też listę najczęściej odwiedzanych stron - liczba odwiedzin musiała być większa niż 0,5\%.
+    
+    Kolejnym krokiem była identyfikacji użytkowników oraz ich w sesji. W przypadku użytkowników skupiono się wyłącznie na liczbie odwiedzonych stron - przygotowany plik w formacie \verb|arff| widoczny jest na rysunku \ref{fig:users_arff}. Przygotowano także plik bez wartości numerycznych (id użytkownika czy liczby zapytań).
+    
+    \begin{figure}[H] 
+    	\begin{center}
+    	\frame{\includegraphics[width=1\textwidth]{zad1/users_arff.png}}
+    	\label{fig:users_arff}
+        \caption{Wyodrębnieni użytkownicy}
+    	\end{center}
+    \end{figure}
+    
+    Równolegle wyodrębniono też sesje, które zawierały następujące flagi:
+    
+    \begin{itemize}
+        \item Czas sesji w sekundach
+        \item Liczba działań w czasie sesji
+        \item Przeciętny czas na stronę
+        \item Zmienne flagowe dla najpopularniejszych stron
+    \end{itemize}
+    
+    Sesja była uznawana za zakończoną, jeżeli po 10 minutach od ostatniego zapytania nie pojawiło się kolejne. Przeciętny czas spędzony na jednej stronie został obliczony ze wzoru:
+    \[ \text{Przeciętny czas na stronę} = \frac{\text{czas sesji}}{\text{liczba działań w czasie sesji} - 1} \]
+    
+    Nie wiadomo jak dużo czasu spędził na ostatniej stronie, dlatego nie jest ona uwzględniania przy obliczaniu czasu.
+    
+    Przygotowany plik \verb|arff| przedstawiono na rysunku \ref{fig:sessions_arff}. Przygotowano też wersję, która zawierała tylko i wyłącznie flagi dla odwiedzonych stron.
+    
+    \begin{figure}[H] 
+    	\begin{center}
+    	\frame{\includegraphics[width=1\textwidth]{zad1/sessions_arff.png}}
+    	\label{fig:sessions_arff}
+        \caption{Wyodrębnione sesje}
+    	\end{center}
+    \end{figure}
+    
+    Dyskretyzacji sesji dokonano w programie Weka, za pomocą odpowiedniego filtru - parametry przedstawiono na rysunku \ref{fig:weka_discretize}. W celu stworzenia równolicznych grup wartość parametru \verb|useEqualFrequency| musi być ustawiona na wartość \verb|True|, w przypadku grup nierównolicznych (domyślna metoda) wartość ta musi wynosić \verb|False|.
+    
+    \setlength{\abovecaptionskip}{4pt}
+    
+    \begin{figure}[H] 
+    	\begin{center}
+    	\includegraphics[width=0.6\textwidth]{zad1/weka_discretize.png}
+    	\label{fig:weka_discretize}
+        \caption{Parametry filtru dokonującego dyksretyzacji}
+    	\end{center}
+    \end{figure}
+    
+    
+\section{Opis przeprowadzonych badań}    
+    
+    \subsection{Analiza skupień}
+    
+    Analizę skupień przeprowadzono przy pomocy metody  k-średnich. Tworzy ona \verb|k| klastrów, w losowy sposób przypisując do nich po jednej obserwacji. Następnie do każdego klastra przypisuje kolejne obserwacje na podstawie ich odległości od środka skupienia, po czym wybierane jest nowe skupienie, którego współrzędne znajdują się najbliższej średniej arytmetycznej współrzędnych wszystkich punktów należących do tego skupienia - jest to nowy środek klastra. Algorytm działa tak długo aż dojdzie do określonej liczby iteracji bądź między kolejnymi iteracjami nie będzie zmian wśród skupień.
+
+    Algorytm uruchomiono z 3 oraz 6 klastrami dla plików sesji z atrybutami numerycznymi oraz flagami odwiedzonych stron oraz dla użytkowników z flagami odwiedzonych stron.
+
+    \subsection{Analiza podobieństw}
+
+    W celu odnalezienia reguł asocjacyjnych wykorzystano algorytm Apriori. Jest to algorytm iteracyjny, który w kolejnych krokach znajduje zbiory częste o rosnących rozmiarach. Na początku algorytm wyodrębnia wszystkie zbiory jednoelementowe o odpowiednim wsparciu. Następnie, w oparciu o te zbiory tworzy zbiory kandydujące dwuelementowe, sprawdzając ich wsparcie - te o odpowiednio wysokiej wartości wykorzystane będą przy tworzeniu zbiorów kandydujących trójelementowych. Każdy kolejny krok generuje zbiory kandydujące o rozmiarze o jeden większym tak długo, aż nie da się wygenerować kolejnych zbiorów kandydujących \cite{Apriori}.
+    
+    Algorytm uruchomiono dla równolicznych zbiorów oraz nierównolicznych zbiorów przygotowanych przez dyskretyzację na pliku sesji.
+
+\newpage
+
+\section{Wyniki analizy klastrowej}
+
+    \subsection{Sesje - 3 klastry}
+
+    % Do wyznaczenia 3 klastrów z wszystkimi flagami algorytm potrzebował 5 iteracji. Suma błędów kwadratowych wyniosła 1283,29.
+    
+    % \begin{table}[H]
+    % \centering
+    % \caption{Wybrane centroidy dla 3 klastrów z wszystkimi flagami podczas analizy sesji}
+    % \label{tab:ses_3clusters}
+    % \resizebox{\textwidth}{!}{%
+    % \begin{tabular}{@{}lcccc@{}}
+    % \toprule
+    % \multicolumn{1}{c}{Attribute} & Full Data & 0 & 1 & 2 \\ \midrule
+    % duration & 437.4543 & 601.5075 & 391.4452 & 589.0588 \\
+    % requests\_count & 5.8159 & 10.9403 & 4.6452 & 9.049 \\
+    % avg\_request\_duration & 123.9246 & 65.1715 & 134.0474 & 105.4523 \\
+    % /ksc.html & False & False & False & False \\
+    % / & False & False & False & False \\
+    % /shuttle/missions/missions.html & False & False & False & False \\
+    % /shuttle/countdown/ & False & False & False & \textbf{True} \\
+    % /shuttle/missions/sts-69/mission-sts-69.html & False & False & False & False \\
+    % /shuttle/missions/sts-70/mission-sts-70.html & False & False & False & False \\
+    % /history/history.html & False & \textbf{True} & False & False \\
+    % /history/apollo/apollo.html & False & \textbf{True} & False & False \\
+    % /history/apollo/apollo-13/apollo-13.html & False & False & False & False \\
+    % /images/ & False & False & False & False \\
+    % /shuttle/technology/sts-newsref/stsref-toc.html & False & False & False & False \\
+    % /software/winvn/winvn.html & False & False & False & False \\
+    % /htbin/cdt\_main.pl & False & False & False & False \\
+    % /shuttle/countdown/liftoff.html & False & False & False & False \\
+    % /shuttle/missions/sts-71/mission-sts-71.html & False & False & False & False \\
+    % /shuttle/missions/sts-70/images/images.html & False & False & False & False \\
+    % /shuttle/technology/sts-newsref/sts\_asm.html & False & False & False & False \\
+    % /shuttle/countdown/countdown.html & False & False & False & False \\
+    % /facilities/lc39a.html & False & False & False & False \\
+    % /shuttle/missions/sts-71/images/images.html & False & False & False & False \\
+    % /elv/elvpage.htm & False & False & False & False \\
+    % /history/apollo/apollo-11/apollo-11.html & False & False & False & False \\
+    % /shuttle/missions/sts-70/movies/movies.html & False & False & False & False \\
+    % /htbin/wais.pl & False & False & False & False \\
+    % /shuttle/missions/sts-71/movies/movies.html & False & False & False & False \\
+    % /shuttle/resources/orbiters/endeavour.html & False & False & False & False \\
+    % /whats-new.html & False & False & False & False \\
+    % /htbin/cdt\_clock.pl & False & False & False & False \\ \bottomrule
+    % \end{tabular}%
+    % }
+    % \end{table}
+    
+    % \begin{table}[H]
+    % \centering
+    % \caption{Przypisanie obserwacji dla 3 klastrów z wszystkimi flagami podczas analizy sesji}
+    % \label{tab:ses_3clusters_sum}
+    % \begin{tabular}{@{}ccc@{}}
+    % \toprule
+    % Klaster & Liczba obserwacji & Procent obserwacji \\ \midrule
+    % 0 & 67 & 9\% \\
+    % \textbf{1} & \textbf{575} & \textbf{77\%} \\
+    % 2 & 102 & 14\% \\ \bottomrule
+    % \end{tabular}
+    % \end{table}
+
+    Dla danych z wyłącznie flagami stron algorytm potrzebował 3 iteracje, a suma błędów kwadratowych wyniosła 1246.
+    
+    \begin{table}[H]
+    \centering
+    \caption{Wybrane centroidy dla 3 klastrów z flagami stron podczas analizy sesji}
+    \label{tab:ses_3clusters_pages}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{@{}lcccc@{}}
+    \toprule
+    \multicolumn{1}{c}{Attribute} & Full Data & 0 & 1 & 2 \\ \midrule
+    /ksc.html & False & False & False & False \\
+    / & False & False & False & False \\
+    /shuttle/missions/missions.html & False & False & False & False \\
+    /shuttle/countdown/ & False & False & False & \textbf{True} \\
+    /shuttle/missions/sts-69/mission-sts-69.html & False & False & False & False \\
+    /shuttle/missions/sts-70/mission-sts-70.html & False & False & False & False \\
+    /history/history.html & False & \textbf{True} & False & False \\
+    /history/apollo/apollo.html & False & \textbf{True} & False & False \\
+    /history/apollo/apollo-13/apollo-13.html & False & False & False & False \\
+    /images/ & False & False & False & False \\
+    /shuttle/technology/sts-newsref/stsref-toc.html & False & False & False & False \\
+    /software/winvn/winvn.html & False & False & False & False \\
+    /htbin/cdt\_main.pl & False & False & False & False \\
+    /shuttle/countdown/liftoff.html & False & False & False & False \\
+    /shuttle/missions/sts-71/mission-sts-71.html & False & False & False & False \\
+    /shuttle/missions/sts-70/images/images.html & False & False & False & False \\
+    /shuttle/technology/sts-newsref/sts\_asm.html & False & False & False & False \\
+    /shuttle/countdown/countdown.html & False & False & False & False \\
+    /facilities/lc39a.html & False & False & False & False \\
+    /shuttle/missions/sts-71/images/images.html & False & False & False & False \\
+    /elv/elvpage.htm & False & False & False & False \\
+    /history/apollo/apollo-11/apollo-11.html & False & False & False & False \\
+    /shuttle/missions/sts-70/movies/movies.html & False & False & False & False \\
+    /htbin/wais.pl & False & False & False & False \\
+    /shuttle/missions/sts-71/movies/movies.html & False & False & False & False \\
+    /shuttle/resources/orbiters/endeavour.html & False & False & False & False \\
+    /whats-new.html & False & False & False & False \\
+    /htbin/cdt\_clock.pl & False & False & False & False \\ \bottomrule
+    \end{tabular}%
+    }
+    \end{table}
+    
+    \begin{table}[H]
+    \centering
+    \caption{Przypisanie obserwacji dla 3 klastrów z flagami stron podczas analizy sesji}
+    \resizebox{0.65\textwidth}{!}{%
+    \label{tab:ses_3clusters_pages_sum}
+    \begin{tabular}{@{}ccc@{}}
+    \toprule
+    Klaster & Liczba obserwacji & Procent obserwacji \\ \midrule
+    0 & 82 & 11\% \\
+    \textbf{1} & \textbf{560} & \textbf{75\%} \\
+    2 & 102 & 14\% \\ \bottomrule
+    \end{tabular}}
+    \end{table}
+    
+    Dla atrybutów numerycznych algorytm potrzebował 12 iteracje, a suma błędów kwadratowych wyniosła 11.72.
+
+    \begin{table}[H]
+    \centering
+    \caption{Wybrane centroidy dla 3 klastrów z atrybutami numerycznymi podczas analizy sesji}
+    \label{tab:num_3clusters_pages}
+    \begin{tabular}{@{}lcccc@{}}
+    \toprule
+    \multicolumn{1}{c}{Attribute} & Full Data & 0 & 1 & 2 \\ \midrule
+    duration & 437.4543 & 179.6325 & 868.1154 & 517.1538 \\
+    requests\_count & 5.8159 & 4.7279 & 9.0726 & 2.4505 \\
+    avg\_request\_duration & 123.9246 & 49.8463 & 158.3098 & 376.5912 \\ \bottomrule
+    \end{tabular}
+    \end{table}
+
+    \begin{table}[H]
+    \centering
+    \caption{Przypisanie obserwacji dla 3 klastrów z atrybutami numerycznymi podczas analizy sesji}
+    \label{tab:num_3clusters_pages_sum}
+    \resizebox{0.65\textwidth}{!}{%
+    \begin{tabular}{@{}ccc@{}}
+    \toprule
+    Klaster & Liczba obserwacji & Procent obserwacji \\ \midrule
+    \textbf{0} & \textbf{419} & \textbf{56\%} \\
+    1 & 234 & 31\% \\
+    2 & 91 & 12\% \\ \bottomrule
+    \end{tabular}}
+    \end{table}
+    
+    Podział na klastry wyraźnie różnił się - w przypadku danych z flagami odwiedzonych stron powstał jeden klaster, który zbierał aż \( \frac{3}{4} \) wszystkich sesji. W przypadku atrybutów numerycznych największy klaster był dużo mniej liczby, ale wciąż zawierał w sobie ponad 50\% wszystkich sesji. Niezależnie od wybranego zbioru atrybutów do analizy skupień, najmniejszy klaster zbierał trochę więcej niż 10\% badanej grupy.
+    
+    Z analizy flag wynika, że kiedy w trakcie sesji odwiedzano stronę\\ \verb|/history/history.html|, odwiedzono też stronę\\ \verb|/history/apollo/apollo.html|. 
+    
+    Dużo większe zróżnicowanie widoczne jest przy analizie atrybutów numerycznych, gdzie każdy środek klastra różnił się w znaczącym stopniu od innych centroidów. Najwięcej sesji zostało przypisanych do 1 klastra, który cechował się najkrótszą długością sesji oraz najmniejszym średnim czasem spędzonym na stronie, ale już nie najmniejszą liczbą zapytań - wciąż była to jednak wartość poniżej średniej dla całego zbioru. 
+    
+    \subsection{Sesje - 6 klastrów}
+    
+    % Algorytm potrzebował 13 iteracji by uzyskać optymalne środki dla 6 klastrów. Suma błędów kwadratowych wyniosła 1062,21.
+
+    % \begin{table}[H]
+    % \centering
+    % \caption{Wybrane centroidy dla 6 klastrów z wszystkimi flagami podczas analizy sesji}
+    % \label{tab:ses_6clusters}
+    % \resizebox{\textwidth}{!}{%
+    % \begin{tabular}{@{}lccccccc@{}}
+    % \toprule
+    % \multicolumn{1}{c}{Attribute} & Full Data & 0 & 1 & 2 & 3 & 4 & 5 \\ \midrule
+    % duration & 437.4543 & 960.4545 & 590.7576 & 692.0633 & 389.3333 & 570.2698 & 274.3758 \\
+    % requests\_count & 5.8159 & 12.6591 & 3 & 10.0759 & 5.6605 & 2.9683 & 5.0667 \\
+    % avg\_request\_duration & 123.9246 & 103.7894 & 325.7903 & 122.1316 & 87.0782 & 325.6745 & 66.2377 \\
+    % /ksc.html & False & False & False & False & \textbf{True} & \textbf{True} & False \\
+    % / & False & False & False & False & False & False & False \\
+    % /shuttle/missions/missions.html & False & False & False & False & False & False & False \\
+    % /shuttle/countdown/ & False & False & False & \textbf{True} & False & False & False \\
+    % /shuttle/missions/sts-69/mission-sts-69.html & False & False & False & False & False & False & False \\
+    % /shuttle/missions/sts-70/mission-sts-70.html & False & False & False & False & False & False & False \\
+    % /history/history.html & False & \textbf{True} & False & False & False & False & False \\
+    % /history/apollo/apollo.html & False & \textbf{True} & False & False & False & False & False \\
+    % /history/apollo/apollo-13/apollo-13.html & False & False & False & False & False & False & False \\
+    % /images/ & False & False & False & False & False & False & False \\
+    % /shuttle/technology/sts-newsref/stsref-toc.html & False & False & False & False & False & False & False \\
+    % /software/winvn/winvn.html & False & False & False & False & False & False & False \\
+    % /htbin/cdt\_main.pl & False & False & False & False & False & False & False \\
+    % /shuttle/countdown/liftoff.html & False & False & False & False & False & False & False \\
+    % /shuttle/missions/sts-71/mission-sts-71.html & False & False & False & False & False & False & False \\
+    % /shuttle/missions/sts-70/images/images.html & False & False & False & False & False & False & False \\
+    % /shuttle/technology/sts-newsref/sts\_asm.html & False & False & False & False & False & False & False \\
+    % /shuttle/countdown/countdown.html & False & False & False & False & False & False & False \\
+    % /facilities/lc39a.html & False & False & False & False & False & False & False \\
+    % /shuttle/missions/sts-71/images/images.html & False & False & False & False & False & False & False \\
+    % /elv/elvpage.htm & False & False & False & False & False & False & False \\
+    % /history/apollo/apollo-11/apollo-11.html & False & False & False & False & False & False & False \\
+    % /shuttle/missions/sts-70/movies/movies.html & False & False & False & False & False & False & False \\
+    % /htbin/wais.pl & False & False & False & False & False & False & False \\
+    % /shuttle/missions/sts-71/movies/movies.html & False & False & False & False & False & False & False \\
+    % /shuttle/resources/orbiters/endeavour.html & False & False & False & False & False & False & False \\
+    % /whats-new.html & False & False & False & False & False & False & False \\
+    % /htbin/cdt\_clock.pl & False & False & False & False & False & False & False \\ \bottomrule
+    % \end{tabular}%
+    % }
+    % \end{table}
+
+    % \begin{table}[H]
+    % \centering
+    % \caption{Przypisanie obserwacji dla 6 klastrów z wszystkimi flagami podczas analizy sesji}
+    % \label{tab:ses_6clusters_sum}
+    % \begin{tabular}{@{}ccc@{}}
+    % \toprule
+    % Klaster & Liczba obserwacji & Procent obserwacji \\ \midrule
+    % 0 & 44 & 6\% \\
+    % 1 & 66 & 9\% \\
+    % 2 & 79 & 11\% \\
+    % 3 & 162 & 22\% \\
+    % 4 & 63 & 8\% \\
+    % \textbf{5} & \textbf{330} & \textbf{44\%} \\ \bottomrule
+    % \end{tabular}
+    % \end{table}
+    
+    Dla 6 klastrów z flagami stron potrzeba było 3 iteracji, a suma błędów kwadratowych wyniosła 1017.
+
+    \begin{table}[H]
+    \centering
+    \caption{Wybrane centroidy dla 6 klastrów z flagami stron podczas analizy sesji}
+    \label{tab:ses_6clusters_pages}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{@{}lccccccc@{}}
+    \toprule
+    \multicolumn{1}{c}{Attribute} & Full Data & 0 & 1 & 2 & 3 & 4 & 5 \\ \midrule
+    /ksc.html & False & False & False & False & \textbf{True} & False & \textbf{True} \\
+    / & False & False & False & False & False & False & False \\
+    /shuttle/missions/missions.html & False & False & False & False & False & False & False \\
+    /shuttle/countdown/ & False & False & False & \textbf{True} & False & False & False \\
+    /shuttle/missions/sts-69/mission-sts-69.html & False & False & False & False & False & False & False \\
+    /shuttle/missions/sts-70/mission-sts-70.html & False & False & False & False & False & False & False \\
+    /history/history.html & False & \textbf{True} & False & False & False & False & False \\
+    /history/apollo/apollo.html & False & \textbf{True} & False & False & False & False & False \\
+    /history/apollo/apollo-13/apollo-13.html & False & False & False & False & False & False & False \\
+    /images/ & False & False & False & False & False & False & False \\
+    /shuttle/technology/sts-newsref/stsref-toc.html & False & False & False & False & False & False & False \\
+    /software/winvn/winvn.html & False & False & False & False & False & False & False \\
+    /htbin/cdt\_main.pl & False & False & False & False & False & \textbf{True} & False \\
+    /shuttle/countdown/liftoff.html & False & False & False & False & False & False & False \\
+    /shuttle/missions/sts-71/mission-sts-71.html & False & False & False & False & False & False & False \\
+    /shuttle/missions/sts-70/images/images.html & False & False & False & False & False & False & False \\
+    /shuttle/technology/sts-newsref/sts\_asm.html & False & False & False & False & False & False & False \\
+    /shuttle/countdown/countdown.html & False & False & False & False & False & False & False \\
+    /facilities/lc39a.html & False & False & False & False & False & False & False \\
+    /shuttle/missions/sts-71/images/images.html & False & False & False & False & False & False & False \\
+    /elv/elvpage.htm & False & False & False & False & False & False & False \\
+    /history/apollo/apollo-11/apollo-11.html & False & False & False & False & False & False & False \\
+    /shuttle/missions/sts-70/movies/movies.html & False & False & False & False & False & False & False \\
+    /htbin/wais.pl & False & False & False & False & False & False & \textbf{True} \\
+    /shuttle/missions/sts-71/movies/movies.html & False & False & False & False & False & False & False \\
+    /shuttle/resources/orbiters/endeavour.html & False & False & False & False & False & False & False \\
+    /whats-new.html & False & False & False & False & False & False & False \\
+    /htbin/cdt\_clock.pl & False & False & False & False & False & False & False \\ \bottomrule
+    \end{tabular}%
+    }
+    \end{table}
+    
+    \begin{table}[H]
+    \centering
+    \caption{Przypisanie obserwacji dla 6 klastrów z flagami stron podczas analizy sesji}
+    \label{tab:ses_6clusters_pages_sum}
+    \resizebox{0.65\textwidth}{!}{%
+    \begin{tabular}{@{}ccc@{}}
+    \toprule
+    Klaster & Liczba obserwacji & Procent obserwacji \\ \midrule
+    0 & 72 & 10\% \\
+    \textbf{1} & \textbf{355} & \textbf{48\%} \\
+    2 & 99 & 13\% \\
+    3 & 191 & 26\% \\
+    4 & 13 & 2\% \\
+    5 & 14 & 2\% \\ \bottomrule
+    \end{tabular}}
+    \end{table}
+    
+    Dla atrybutów numerycznych algorytm dokonał klasteryzacji w 16 iteracji, a suma błędów kwadratowych wyniosła 5.73.
+    
+    \begin{table}[H]
+    \centering
+    \caption{Wybrane centroidy dla 6 klastrów z flagami numerycznymi podczas analizy sesji}
+    \resizebox{\textwidth}{!}{%
+    \label{tab:num_6clusters_pages}
+    \begin{tabular}{@{}lccccccc@{}}
+    \toprule
+    \multicolumn{1}{c}{Attribute} & Full Data & 0 & 1 & 2 & 3 & 4 & 5 \\ \midrule
+    duration & 437.4543 & 466.3737 & 2519.069 & 571.4189 & 578.5113 & 499.8718 & 89.8925 \\
+    requests\_count & 5.8159 & 7.1105 & 35.4828 & 3 & 4.4662 & 2.1026 & 3.7599 \\
+    avg\_request\_duration & 123.9246 & 89.7212 & 118.6991 & 294.6956 & 171.0568 & 458.8205 & 33.1848 \\ \bottomrule
+    \end{tabular}
+    }
+    \end{table}
+    
+    \begin{table}[H]
+    \centering
+    \caption{Przypisanie obserwacji dla 6 klastrów z atrybutami numerycznymi podczas analizy sesji}
+    \label{tab:num_6clusters_pages_sum}
+    \resizebox{0.65\textwidth}{!}{%
+    \begin{tabular}{@{}ccc@{}}
+    \toprule
+    Klaster & Liczba obserwacji & Procent obserwacji \\ \midrule
+    0 & 190 & 26\% \\
+    1 & 29 & 4\% \\
+    2 & 74 & 10\% \\
+    3 & 133 & 18\% \\
+    4 & 39 & 5\% \\
+    \textbf{5} & \textbf{279} & \textbf{38\%} \\ \bottomrule
+    \end{tabular}}
+    \end{table}
+    
+    Podobnie jak dla 3 klastrów, algorytm dla 6 klastrów przy różnych danych nie wyznaczył podobnych liczbowo skupień - większy klaster został utworzony dla danych z flagami stron, skupiał on prawie połowę badanych sesji. Dla atrybutów numerycznych najmniejsze klastry były jednak ponad dwukrotnie większe od najmniejszych klastrów dla danych zawierających flagi sesji.
+    
+    Wszystkie wyznaczone klastry przez algorytm dla 3 skupień pojawiają się w grupie zawierającej 6 skupień. W aż dwóch nowych skupieniach pojawia się najpopularniejsza strona \verb|ksc.html|. 
+    
+    Ponownie najliczniejszym skupieniem dla atrybutów numerycznych jest to, którego długość sesji oraz średni czas na stronie są najmniejsze. Do klastra 1 algorytm przypisał sesje które cechowały się bardzo wysokimi wartościami - jest to prawie 30 rekordów, które znacznie podnoszą średnią wartość wszystkich atrybutów numerycznych - dzięki tej obserwacji wysoka liczność wśród klastra zawierającego dużo niższe od średnich wartości w ogóle nie dziwi. 
+
+    \subsection{Użytkownicy - 3 klastry}
+
+    % Do wyznaczenia 3 klastrów z wszystkimi flagami algorytm potrzebował 23 iteracji. Suma błędów kwadratowych wyniosła 4710,76.
+
+    % \begin{table}[H]
+    % \centering
+    % \caption{Wybrane centroidy dla 3 klastrów z wszystkimi flagami podczas analizy użytkowników}
+    % \label{tab:usr_3clusters}
+    % \resizebox{\textwidth}{!}{%
+    % \begin{tabular}{@{}lcccc@{}}
+    % \toprule
+    % \multicolumn{1}{c}{Attribute} & Full Data & 0 & 1 & 2 \\ \midrule
+    % requests\_count & 4.3001 & 67.4167 & 7.5961 & 3.3834 \\
+    % /ksc.html & False & False & False & False \\
+    % / & False & False & False & False \\
+    % /shuttle/missions/missions.html & False & False & \textbf{True} & False \\
+    % /shuttle/countdown/ & False & False & False & False \\
+    % /shuttle/missions/sts-69/mission-sts-69.html & False & False & False & False \\
+    % /shuttle/missions/sts-70/mission-sts-70.html & False & False & False & False \\
+    % /history/history.html & False & False & False & False \\
+    % /history/apollo/apollo.html & False & False & False & False \\
+    % /history/apollo/apollo-13/apollo-13.html & False & False & False & False \\
+    % /images/ & False & False & False & False \\
+    % /shuttle/technology/sts-newsref/stsref-toc.html & False & False & False & False \\
+    % /software/winvn/winvn.html & False & False & False & False \\
+    % /htbin/cdt\_main.pl & False & False & False & False \\
+    % /shuttle/countdown/liftoff.html & False & False & False & False \\
+    % /shuttle/missions/sts-71/mission-sts-71.html & False & False & False & False \\
+    % /shuttle/missions/sts-70/images/images.html & False & False & False & False \\
+    % /shuttle/technology/sts-newsref/sts\_asm.html & False & False & False & False \\
+    % /shuttle/countdown/countdown.html & False & False & False & False \\
+    % /facilities/lc39a.html & False & False & False & False \\
+    % /shuttle/missions/sts-71/images/images.html & False & False & False & False \\
+    % /elv/elvpage.htm & False & False & False & False \\
+    % /history/apollo/apollo-11/apollo-11.html & False & False & False & False \\
+    % /shuttle/missions/sts-70/movies/movies.html & False & False & False & False \\
+    % /htbin/wais.pl & False & False & False & False \\
+    % /shuttle/missions/sts-71/movies/movies.html & False & False & False & False \\
+    % /shuttle/resources/orbiters/endeavour.html & False & False & False & False \\
+    % /whats-new.html & False & False & False & False \\
+    % /htbin/cdt\_clock.pl & False & False & False & False \\ \bottomrule
+    % \end{tabular}%
+    % }
+    % \end{table}
+    
+    % \begin{table}[H]
+    % \centering
+    % \caption{Przypisanie obserwacji dla 3 klastrów z wszystkimi flagami podczas analizy użytkowników}
+    % \label{tab:usr_3clusters_sum}
+    % \begin{tabular}{@{}ccc@{}}
+    % \toprule
+    % Klaster & Liczba obserwacji & Procent obserwacji \\ \midrule
+    % 0 & 24 & 1\% \\
+    % 1 & 406 & 11\% \\
+    % \textbf{2} & \textbf{3112} & \textbf{88\%} \\ \bottomrule
+    % \end{tabular}
+    % \end{table}
+    
+    Do wyznaczenia 3 klastrów z flagami stron dla użytkowników algorytm potrzebował 9 iteracji, a suma błędów kwadratowych wyniosła 4610,76.
+
+    \begin{table}[H]
+    \centering
+    \caption{Wybrane centroidy dla 3 klastrów z flagami stron podczas analizy użytkowników}
+    \label{tab:usr_3clusters_pages}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{@{}lcccc@{}}
+    \toprule
+    \multicolumn{1}{c}{Attribute} & Full Data & 0 & 1 & 2 \\ \midrule
+    /ksc.html & False & False & False & False \\
+    / & False & False & False & False \\
+    /shuttle/missions/missions.html & False & False & \textbf{True} & False \\
+    /shuttle/countdown/ & False & False & False & \textbf{True} \\
+    /shuttle/missions/sts-69/mission-sts-69.html & False & False & False & False \\
+    /shuttle/missions/sts-70/mission-sts-70.html & False & False & False & False \\
+    /history/history.html & False & False & False & False \\
+    /history/apollo/apollo.html & False & False & False & False \\
+    /history/apollo/apollo-13/apollo-13.html & False & False & False & False \\
+    /images/ & False & False & False & False \\
+    /shuttle/technology/sts-newsref/stsref-toc.html & False & False & False & False \\
+    /software/winvn/winvn.html & False & False & False & False \\
+    /htbin/cdt\_main.pl & False & False & False & False \\
+    /shuttle/countdown/liftoff.html & False & False & False & False \\
+    /shuttle/missions/sts-71/mission-sts-71.html & False & False & False & False \\
+    /shuttle/missions/sts-70/images/images.html & False & False & False & False \\
+    /shuttle/technology/sts-newsref/sts\_asm.html & False & False & False & False \\
+    /shuttle/countdown/countdown.html & False & False & False & False \\
+    /facilities/lc39a.html & False & False & False & False \\
+    /shuttle/missions/sts-71/images/images.html & False & False & False & False \\
+    /elv/elvpage.htm & False & False & False & False \\
+    /history/apollo/apollo-11/apollo-11.html & False & False & False & False \\
+    /shuttle/missions/sts-70/movies/movies.html & False & False & False & False \\
+    /htbin/wais.pl & False & False & False & False \\
+    /shuttle/missions/sts-71/movies/movies.html & False & False & False & False \\
+    /shuttle/resources/orbiters/endeavour.html & False & False & False & False \\
+    /whats-new.html & False & False & False & False \\
+    /htbin/cdt\_clock.pl & False & False & False & False \\ \bottomrule
+    \end{tabular}%
+    }
+    \end{table}
+    
+    \begin{table}[H]
+    \centering
+    \caption{Przypisanie obserwacji dla 3 klastrów z flagami stron podczas analizy użytkowników}
+    \label{tab:usr_3clusters_sum_pages}
+    \resizebox{0.65\textwidth}{!}{%
+    \begin{tabular}{@{}ccc@{}}
+    \toprule
+    Klaster & Liczba obserwacji & Procent obserwacji \\ \midrule
+    \textbf{0} & \textbf{2810} & \textbf{79\%} \\
+    1 & 406 & 11\% \\
+    2 & 326 & 9\% \\ \bottomrule
+    \end{tabular}}
+    \end{table}
+    
+    Użytkownicy różnili się od siebie dużo bardziej niż sesje, na co wskazuje ponad 3 razy większy średni błąd kwadratowy, co będzie widoczne także dla 6 klastrów. Większość użytkowników, bo prawie \( \frac{4}{5} \), zostało przypisanych do klastra, który nie cechuje się odwiedzeniem żadnej z najpopularniejszych stron. Klastry te różnią się także od tych utworzonych na podstawie sesji, co może wskazywać na większą popularność konkretnych stron dla różnej grupy użytkowników. 
+    
+    \subsection{Użytkownicy - 6 klastrów}
+
+    % Algorytm potrzebował 14 iteracji by uzyskać optymalne środki dla 6 klastrów. Suma błędów kwadratowych wyniosła 3814,99.
+
+    % \begin{table}[H]
+    % \centering
+    % \caption{Wybrane centroidy dla 6 klastrów z wszystkimi flagami podczas analizy użytkowników}
+    % \label{tab:usr_6clusters}
+    % \resizebox{\textwidth}{!}{%
+    % \begin{tabular}{@{}lccccccc@{}}
+    % \toprule
+    % \multicolumn{1}{c}{Attribute} & Full Data & 0 & 1 & 2 & 3 & 4 & 5 \\ \midrule
+    % requests\_count & 4.3001 & 34.9811 & 9.7027 & 6.5788 & 8.0852 & 2.7419 & 3.7222 \\
+    % /ksc.html & False & False & False & False & False & False & \textbf{True} \\
+    % / & False & False & False & False & False & False & False \\
+    % /shuttle/missions/missions.html & False & False & \textbf{True} & False & \textbf{True} & False & False \\
+    % /shuttle/countdown/ & False & False & False & \textbf{True} & False & False & False \\
+    % /shuttle/missions/sts-69/mission-sts-69.html & False & False & False & False & False & False & False \\
+    % /shuttle/missions/sts-70/mission-sts-70.html & False & False & False & False & False & False & False \\
+    % /history/history.html & False & False & False & False & False & False & False \\
+    % /history/apollo/apollo.html & False & False & False & False & False & False & False \\
+    % /history/apollo/apollo-13/apollo-13.html & False & False & False & False & False & False & False \\
+    % /images/ & False & False & False & False & False & False & False \\
+    % /shuttle/technology/sts-newsref/stsref-toc.html & False & False & False & False & False & False & False \\
+    % /software/winvn/winvn.html & False & False & False & False & False & False & False \\
+    % /htbin/cdt\_main.pl & False & False & False & False & False & False & False \\
+    % /shuttle/countdown/liftoff.html & False & False & False & False & False & False & False \\
+    % /shuttle/missions/sts-71/mission-sts-71.html & False & False & \textbf{True} & False & False & False & False \\
+    % /shuttle/missions/sts-70/images/images.html & False & False & False & False & False & False & False \\
+    % /shuttle/technology/sts-newsref/sts\_asm.html & False & False & False & False & False & False & False \\
+    % /shuttle/countdown/countdown.html & False & False & False & False & False & False & False \\
+    % /facilities/lc39a.html & False & False & False & False & False & False & False \\
+    % /shuttle/missions/sts-71/images/images.html & False & False & False & False & False & False & False \\
+    % /elv/elvpage.htm & False & False & False & False & False & False & False \\
+    % /history/apollo/apollo-11/apollo-11.html & False & False & False & False & False & False & False \\
+    % /htbin/wais.pl & False & False & False & False & False & False & False \\
+    % /shuttle/missions/sts-70/movies/movies.html & False & False & False & False & False & False & False \\
+    % /shuttle/missions/sts-71/movies/movies.html & False & False & False & False & False & False & False \\
+    % /shuttle/resources/orbiters/endeavour.html & False & False & False & False & False & False & False \\
+    % /whats-new.html & False & False & False & False & False & False & False \\
+    % /htbin/cdt\_clock.pl & False & False & False & False & False & False & False \\ \bottomrule
+    % \end{tabular}%
+    % }
+    % \end{table}
+
+    % \begin{table}[H]
+    % \centering
+    % \caption{Przypisanie obserwacji dla 6 klastrów z wszystkimi flagami podczas analizy użytkowników}
+    % \label{tab:usr_6clusters_sum}
+    % \begin{tabular}{@{}ccc@{}}
+    % \toprule
+    % Klaster & Liczba obserwacji & Procent obserwacji \\ \midrule
+    % 0 & 53 & 1\% \\
+    % 1 & 37 & 1\% \\
+    % 2 & 273 & 8\% \\
+    % 3 & 317 & 9\% \\
+    % \textbf{4} & \textbf{2034} & \textbf{57\%} \\
+    % 5 & 828 & 23\% \\ \bottomrule
+    % \end{tabular}
+    % \end{table}
+
+    W przypadku 6 klastrów potrzeba było 3 iteracji, a suma błędów kwadratowych wyniosła 3493.
+
+    \begin{table}[H]
+    \centering
+    \caption{Wybrane centroidy dla 6 klastrów z flagami stron podczas analizy użytkowników}
+    \label{tab:usr_6clusters_pages}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{@{}lccccccc@{}}
+    \toprule
+    \multicolumn{1}{c}{Attribute} & Full Data & 0 & 1 & 2 & 3 & 4 & 5 \\ \midrule
+    /ksc.html & False & False & False & False & False & False & \textbf{True} \\
+    / & False & False & False & False & False & False & False \\
+    /shuttle/missions/missions.html & False & False & \textbf{True} & False & \textbf{True} & False & False \\
+    /shuttle/countdown/ & False & False & False & \textbf{True} & False & False & False \\
+    /shuttle/missions/sts-69/mission-sts-69.html & False & False & False & False & False & False & False \\
+    /shuttle/missions/sts-70/mission-sts-70.html & False & False & False & False & False & False & False \\
+    /history/history.html & False & False & False & False & False & False & False \\
+    /history/apollo/apollo.html & False & False & False & False & False & False & False \\
+    /history/apollo/apollo-13/apollo-13.html & False & False & False & False & False & False & False \\
+    /images/ & False & False & False & False & False & False & False \\
+    /shuttle/technology/sts-newsref/stsref-toc.html & False & False & False & False & False & False & False \\
+    /software/winvn/winvn.html & False & False & False & False & False & False & False \\
+    /htbin/cdt\_main.pl & False & False & False & False & False & False & False \\
+    /shuttle/countdown/liftoff.html & False & False & False & False & False & False & False \\
+    /shuttle/missions/sts-71/mission-sts-71.html & False & False & \textbf{True} & False & False & False & False \\
+    /shuttle/missions/sts-70/images/images.html & False & False & False & False & False & False & False \\
+    /shuttle/technology/sts-newsref/sts\_asm.html & False & False & False & False & False & False & False \\
+    /shuttle/countdown/countdown.html & False & False & False & False & False & False & False \\
+    /facilities/lc39a.html & False & False & False & False & False & False & False \\
+    /shuttle/missions/sts-71/images/images.html & False & False & False & False & False & False & False \\
+    /elv/elvpage.htm & False & False & False & False & False & \textbf{True} & False \\
+    /history/apollo/apollo-11/apollo-11.html & False & False & False & False & False & False & False \\
+    /shuttle/missions/sts-70/movies/movies.html & False & False & False & False & False & False & False \\
+    /htbin/wais.pl & False & False & False & False & False & False & False \\
+    /shuttle/missions/sts-71/movies/movies.html & False & False & False & False & False & False & False \\
+    /shuttle/resources/orbiters/endeavour.html & False & False & False & False & False & False & False \\
+    /whats-new.html & False & False & False & False & False & False & False \\
+    /htbin/cdt\_clock.pl & False & False & False & False & False & False & False \\ \bottomrule
+    \end{tabular}%
+    }
+    \end{table}
+
+    \begin{table}[H]
+    \centering
+    \caption{Przypisanie obserwacji dla 6 klastrów z flagami stron podczas analizy użytkowników}
+    \label{tab:usr_6clusters_sum_pages}
+    \resizebox{0.65\textwidth}{!}{%
+    \begin{tabular}{@{}ccc@{}}
+    \toprule
+    Klaster & Liczba obserwacji & Procent obserwacji \\ \midrule
+    \textbf{0} & \textbf{2051} & \textbf{58\%} \\
+    1 & 31 & 1\% \\
+    2 & 364 & 10\% \\
+    3 & 337 & 10\% \\
+    4 & 48 & 1\% \\
+    5 & 711 & 20\% \\ \bottomrule
+    \end{tabular}}
+    \end{table}
+
+    Podobnie jak przy 3 klastrach, tak w przypadku 6 klastrów największy klaster cechuje się nie odwiedzeniem żadnej z najpopularniejszych stron. Aż 20\% użytkowników zostało przypisanych do klastra, który cechuje się odwiedzeniem strony \verb|ksc.html| - taki klaster jednak nie powstał dla 3 skupień.
+
+    % Przy 6 klastrach cechy numeryczne wciąż nie mają dużego wpływu na końcowy wynik - wyniki podobnie różnią się wyłącznie najmniejszymi klastrami (1\% dla klastra nr 4 z tabeli \ref{tab:usr_6clusters_pages}, który jako jedyny nie posiada bezpośredniego odpowiednika w tabeli \ref{tab:ses_6clusters}). Także wciąż widoczne jest, że większość użytkowników nie odwiedziła najpopularniejszych stron - do największych klastrów, których obserwacje w centrach nie miały odwiedzonych żadnych z najpopularniejszych stron stanowiły prawie 60\% całości. 
+
+\section{Wyniki analizy koszykowej}
+
+\begin{table}[H]
+\centering
+\caption{Parametry przebiegu algorytmu Apriori dla atrybutów numerycznych}
+\label{tab:apriori_num_params}
+\resizebox{0.55\textwidth}{!}{%
+\begin{tabular}{@{}lc@{}}
+\toprule
+\multicolumn{1}{c}{Paramter} & Wartość \\ \midrule
+Minimum support & 0.1 (74 instances) \\
+Minimum metric & 0.9 \\
+Number of cycles performed & 18 \\
+Size of set of large itemsets L(1) & 4 \\
+Size of set of large itemsets L(2) & 5 \\
+Size of set of large itemsets L(3) & 2 \\ 
+\bottomrule
+\end{tabular} }
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Liczba obserwacji przypisanych do koszyków dla atrybutów numerycznych}
+\label{tab:apriori_notequal_counter}
+\resizebox{0.55\textwidth}{!}{%
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\multicolumn{1}{c}{Atrybut} & B1of3 & B2of3 & B3of3 \\ \midrule
+Czas sesji & 726 & 15 & 3 \\
+Liczba odwiedzonych stron & 741 & 2 & 1 \\
+Średni czas na stronę & 602 & 110 & 32 \\ \bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Parametry przebiegu algorytmu Apriori dla flag stron}
+\label{tab:apriori_equal_params}
+\resizebox{0.55\textwidth}{!}{%
+\begin{tabular}{@{}lc@{}}
+\toprule
+\multicolumn{1}{c}{Paramter} & Wartość \\ \midrule
+Minimum support & 0.95 (707 instances) \\
+Minimum metric & 0.9 \\
+Number of cycles performed & 1 \\
+Size of set of large itemsets L(1) & 18 \\
+Size of set of large itemsets L(2) & 49 \\
+Size of set of large itemsets L(3) & 20 \\ 
+\bottomrule
+\end{tabular} }
+\end{table}
+
+
+Wyznaczone reguły asocjacyjne są widoczne w tabeli \ref{tab:apriori}.
+
+Wykryte reguły asocjacyjne są w większości powiązane z najliczniejszymi koszykami - szczególnie w przypadku analizowania czasu sesji oraz liczby odwiedzonych stron, gdzie największe koszyki pokrywają ponad 97\% wszystkich sesji. Algorytm odnalazł kilka reguł powiązanych z "przeciętnym" średnim czasem poświęconym na stronę - takie rekordy w większości wciąż będą przypisane do koszyka zawierającego najmniejsze wartości w atrybutach powiązanych z długością sesji czy liczbą stron. Najmniejszy wskaźnik pewności wyniósł \verb|0,97|.
+
+Reguły wyznaczone dla stron zawsze dotyczą nie odwiedzenia danych stron, na przykład "\textit{Użytkownik który nie odwiedził w danej sesji strony X, nie odwiedził także strony Y}". Wskaźnik pewności waha się w przedziale \verb|<0,99;1>|, co jest bardzo wysoką wartością, ale sama przydatność tych reguł jest znikoma. W dodatku aż 9 na 10 reguł dotyczy nieodwiedzenia strony \verb|/software/winvn/winvn.html|. 
+
+\begin{landscape}
+\mbox{}\vfill
+\begin{table}[H]
+\caption{Znalezione reguły asocjacyjne}
+\label{tab:apriori}
+\resizebox{1.85\textwidth}{!}{%
+\begin{tabular}{@{}lll@{}}
+\toprule
+\multicolumn{1}{c}{Jeżeli} & \multicolumn{1}{c}{To} & \multicolumn{1}{c}{Parametry} \\ \midrule
+\multicolumn{3}{c}{Atrybuty numeryczne} \\ \midrule
+avg\_request\_duration='B2of3' 110 & requests\_count='B1of3' 110 & conf:(1) lift:(1) lev:(0) [0] conv:(0.44) \\
+duration='B1of3' avg\_request\_duration='B2of3' 109 & requests\_count='B1of3' 109 & conf:(1) lift:(1) lev:(0) [0] conv:(0.44) \\
+duration='B1of3' 726 & requests\_count='B1of3' 725 & conf:(1) lift:(1) lev:(0) [1] conv:(1.46) \\
+duration='B1of3' avg\_request\_duration='B1of3' 585 & requests\_count='B1of3' 584 & conf:(1) lift:(1) lev:(0) [1] conv:(1.18) \\
+avg\_request\_duration='B1of3' 602 & requests\_count='B1of3' 599 & conf:(1) lift:(1) lev:(-0) [0] conv:(0.61) \\
+avg\_request\_duration='B2of3' 110 & duration='B1of3' 109 & conf:(0.99) lift:(1.02) lev:(0) [1] conv:(1.33) \\
+requests\_count='B1of3' avg\_request\_duration='B2of3' 110 & duration='B1of3' 109 & conf:(0.99) lift:(1.02) lev:(0) [1] conv:(1.33) \\
+avg\_request\_duration='B2of3' 110 & duration='B1of3' requests\_count='B1of3' 109 & conf:(0.99) lift:(1.02) lev:(0) [1] conv:(1.4) \\
+requests\_count='B1of3' 741 & duration='B1of3' 725 & conf:(0.98) lift:(1) lev:(0) [1] conv:(1.05) \\
+requests\_count='B1of3' avg\_request\_duration='B1of3' 599 & duration='B1of3' 584 & conf:(0.97) lift:(1) lev:(-0) [0] conv:(0.91) \\
+\midrule
+\multicolumn{3}{c}{Flagi stron} \\
+\midrule
+/shuttle/countdown/liftoff.html=False 709 & /htbin/cdt\_clock.pl=False 707 & conf:(1) lift:(1.01) lev:(0.01) [6] conv:(2.86) \\
+/htbin/cdt\_clock.pl=False 735 & /software/winvn/winvn.html=False 729 & conf:(0.99) lift:(1) lev:(-0) [0] conv:(0.85) \\
+/shuttle/resources/orbiters/endeavour.html=False 732 & /software/winvn/winvn.html=False 726 & conf:(0.99) lift:(1) lev:(-0) [0] conv:(0.84) \\
+/whats-new.html=False 730 & /software/winvn/winvn.html=False 724 & conf:(0.99) lift:(1) lev:(-0) [0] conv:(0.84) \\
+/history/apollo/apollo-11/apollo-11.html=False 729 & /software/winvn/winvn.html=False 723 & conf:(0.99) lift:(1) lev:(-0) [0] conv:(0.84) \\
+/shuttle/countdown/countdown.html=False 728 & /software/winvn/winvn.html=False 722 & conf:(0.99) lift:(1) lev:(-0) [0] conv:(0.84) \\
+/shuttle/missions/sts-71/movies/movies.html=False 727 & /software/winvn/winvn.html=False 721 & conf:(0.99) lift:(1) lev:(-0) [0] conv:(0.84) \\
+/images/=False 724 & /software/winvn/winvn.html=False 718 & conf:(0.99) lift:(1) lev:(-0) [0] conv:(0.83) \\
+/elv/elvpage.htm=False 723 & /software/winvn/winvn.html=False 717 & conf:(0.99) lift:(1) lev:(-0) [0] conv:(0.83) \\
+/shuttle/resources/orbiters/endeavour.html=False /htbin/cdt\_clock.pl=False 723 & /software/winvn/winvn.html=False 717 & conf:(0.99) lift:(1) lev:(-0) [0] conv:(0.83) \\ \bottomrule
+\end{tabular}%
+}
+\end{table}
+\vfill
+\end{landscape}
+
+
+\nocite{*}
+\begin{thebibliography}{}
+
+    \bibitem{Apriori}
+    \textsl{Algorytmy odkrywania binarnych reguł asocjacyjnych, }
+    \author{A. Starczewski, A. Krzyżak,}
+    \url{ http://wazniak.mimuw.edu.pl/images/c/c3/ED-4.2-m03-1.0.pdf}
+    \text{ [dostęp: 05.11.2020]}
+    
+\end{thebibliography}
+
+\end{document}

@@ -1,0 +1,253 @@
+\documentclass[12pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[T1]{polski}
+\usepackage[utf8]{inputenc}
+\newcommand{\BibTeX}{{\sc Bib}\TeX} 
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage{subcaption}
+\usepackage{float}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%%%%%%%%%% TRYB DRAFTU
+\setkeys{Gin}{draft=True}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\setlength{\textheight}{21cm}
+
+\title{{\bf E-learningowy Projekt Zaliczeniowy}\linebreak
+Eksploracja Danych Internetowych}
+\author{Paweł Jeziorski, 234066 \and Karol Podlewski 234106}
+\date{01.02.2021}
+
+\begin{document}
+\clearpage\maketitle
+\thispagestyle{empty}
+\newpage
+\setcounter{page}{1}
+\section{Cel zadania}
+
+Celem zadania była implementacja sieci neuronowej typu autodekoder w celu kompresji obrazów.
+
+\section{Wstęp teoretyczny}
+
+Autodekoder to sieć neuronowa, która wykorzystywana jest przede wszystkim do ekstrakcji cech lub kompresji danych. Autodekoder to wielowarstwowy perceptron, składający się z neuronów liniowych, zawierający jedną warstwę ukrytą. Warstwy wejściowe oraz wyjściowe zawierają tyle samo neuronów, zaś warstwa ukryta zazwyczaj zawiera ich mniej - odpowiada ona za stratną kompresje danych.
+
+\begin{figure}[H]
+ \centering
+ \includegraphics[width=0.8\linewidth]{projekt/autodekoder.png}
+ \vspace{-0.1cm}
+ \caption{Schemat sieci liniowej typu autodekoder \cite{instrukcja}}
+ \label{FFT}
+\end{figure}
+
+W celu przetwarzania obrazów, należy pracować na ich pikselach. Obraz o wielkości 512x512 ładowany jest do pamięci właśnie w postaci tablicy dwuwymiarowej o takich właśnie rozmiarach. Żeby wprowadzić taką tablicę do sieci, należy ją najpierw spłaszczyć. Tworzenie wektora o 262 144 wejściach mija się z celem, dlatego operuje się na mniejszych fragmentach obrazu - np. w jednym momencie przetwarza się mniejszy fragment obrazu - kwadrat o wielkości 8x8 wymaga już tylko 64 neurony na wejściu oraz wyjściu.
+
+Taki skompresowany obraz możliwy jest do oceny gołym okiem, ale jako dodatek przydatna może być także miara PSNR (ang. \textit{Peak Signal to Noise Ratio}), którą wylicza się ze wzoru
+
+\begin{equation}
+PSNR = 10 \cdot \log_{10} \left(\frac{255^2}{\frac{1}{512^2}\sum_{i=0}^{511}\sum_{j=0}^{511}(x_ij - \hat{x}_ij)^2} \right)
+\end{equation}
+
+gdzie mianownik ułamka w logarytmie wynika bezpośrednio z największej możliwej wartości do uzyskania, a iteracje do 512 elementów są powiązanie z wielkością przetwarzanego obrazu \cite{instrukcja}.
+
+\subsection{Implementacja}
+
+Zaimplementowana sieć neuronowa charakteryzuje się następującymi, zmiennymi parametrami:
+
+\begin{itemize}
+    \item \textbf{Liczba neuronów w warstwie ukrytej} - w ramach zadania zmieniana będzie liczba neuronów w warstwie ukrytej - wartości, jakie przetestowaliśmy to 2, 4, 6, 8, 10, 12, 20 oraz 30,
+    \item \textbf{Liczba iteracji} - przetestowaliśmy algorytm dla 10000 iteracji.
+    \item \textbf{Współczynnik uczenia} - w omawianym rozwiązaniu ustawiony na stałe na wartość 0,01,
+    \item \textbf{Szerokość wzorca} - długość boku, który będzie poddawany uczeniu w sieci. W wypadku tego zadania jest to 8. Długość boku definiuje także liczbę neuronów w warstwie wejściowej oraz wyjściowej - jest to 64, czyli tyle samo, ile pikselów we fragmencie obrazu o wielkości 8x8, 
+    \item \textbf{Liczba wzorców treningowych} - w przypadku omawianego rozwiązania zawsze jest to 10000.
+\end{itemize}
+
+Wszystkie funkcje aktywacji są funkcjami liniowymi, a stopień kompresji obrazu obliczany jest ze wzoru:
+
+\begin{equation}
+CR = \frac{bp \cdot wysokosc\_obrazu \cdot szerokosc\_obrazu }{bw \cdot ni \cdot nh + bh \cdot no + bw \cdot nh \cdot no}
+\end{equation}
+
+gdzie $bp$ to liczba bitów na piksel (w wypadku przetwarzanych obrazów jest to 8), $wysokosc$ i $szerokosc$ obrazu jest równa 512, $bw$ to bity potrzebne to zapamiętania wagi neuronu (we wzorze przyjęte zostało 8), $bh$ odpowiada bitom potrzebnym na zapamiętanie współczynnika na wyjściu warstwy ukrytej (przyjęte jako 12), a $ni$, $nh$ oraz $no$ to liczba neuronów w warstwach wejściowej, ukrytej i wyjściowej - na potrzebę realizacji tego zadania liczba $ni$ oraz $no$ jest stała i wynosi 64.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%   BADANIA
+
+\newpage
+\section{Eksperymenty i wyniki}
+
+W ramach części doświadczalnej napisany program został sprawdzony na następujących 8 obrazach:
+
+
+
+\begin{figure}[H]
+\renewcommand*\thesubfigure{0\arabic{subfigure}} 
+\centering
+ \begin{subfigure}[b]{.24\linewidth}
+   \centering
+   \includegraphics[width=.9\textwidth]{projekt/01.png}
+   \caption{}\label{fig:a_2}
+ \end{subfigure}%  
+  \begin{subfigure}[b]{.24\linewidth}
+   \centering
+   \includegraphics[width=.9\textwidth]{projekt/02.png}
+   \caption{}\label{fig:a_4}
+ \end{subfigure}%  
+  \begin{subfigure}[b]{.24\linewidth}
+   \centering
+   \includegraphics[width=.9\textwidth]{projekt/03.png}
+   \caption{}\label{fig:a_6}
+ \end{subfigure}%  
+  \begin{subfigure}[b]{.24\linewidth}
+   \centering
+   \includegraphics[width=.9\textwidth]{projekt/04.png}
+   \caption{}\label{fig:a_8}
+ \end{subfigure}\\%  
+ \begin{subfigure}[b]{.24\linewidth}
+   \centering
+   \includegraphics[width=.9\textwidth]{projekt/05.png}
+   \caption{}\label{fig:a_10}
+ \end{subfigure}%
+  \begin{subfigure}[b]{.24\linewidth}
+   \centering
+   \includegraphics[width=.9\textwidth]{projekt/06.png}
+   \caption{}\label{fig:a_12}
+ \end{subfigure}%
+  \begin{subfigure}[b]{.24\linewidth}
+   \centering
+   \includegraphics[width=.9\textwidth]{projekt/07.png}
+   \caption{}\label{fig:a_20}
+ \end{subfigure}%
+  \begin{subfigure}[b]{.24\linewidth}
+   \centering
+   \includegraphics[width=.9\textwidth]{projekt/08.png}
+   \caption{}\label{fig:a_30}
+ \end{subfigure}\\%    
+ \caption{Obrazy wykorzystane w części eksperymentalnej.}\label{obrazy}
+\end{figure}
+
+\subsection{Opis eksperymentów}
+
+W ramach przeprowadzonych badań jedynym zmienianym czynnikiem były obrazy należące do grupy badawczej. Przeprowadzono 4 różne symulacje:
+
+\begin{enumerate}
+    \item Zbiór treningowy składający się z obrazów 01 oraz 03,
+    \item Zbiór treningowy składający się z obrazów 02 oraz 04,
+    \item Zbiór treningowy składający się z obrazów 05 oraz 06,
+    \item Zbiór treningowy składający się z obrazów 06 oraz 08.
+\end{enumerate}
+
+Wyniki uzyskanych eksperymentów przedstawiono w formie wykresów PSNR do stopnia kompresji.
+
+\newpage
+\subsection{Wyniki}
+
+Przykładowa kompresja obrazu dla zestawu 1 znajduje się na Rysunku \ref{kompresja}.
+
+\begin{figure}[H]
+\centering
+ \begin{subfigure}[b]{.24\linewidth}
+   \centering
+   \includegraphics[width=.9\textwidth]{projekt/out_01_2.png}
+   \caption{2 neurony}\label{fig:a}
+ \end{subfigure}%  
+  \begin{subfigure}[b]{.24\linewidth}
+   \centering
+   \includegraphics[width=.9\textwidth]{projekt/out_01_2.png}
+   \caption{4 neurony}\label{fig:b}
+ \end{subfigure}%  
+  \begin{subfigure}[b]{.24\linewidth}
+   \centering
+   \includegraphics[width=.9\textwidth]{projekt/out_01_2.png}
+   \caption{6 neuronów}\label{fig:c}
+ \end{subfigure}%  
+  \begin{subfigure}[b]{.24\linewidth}
+   \centering
+   \includegraphics[width=.9\textwidth]{projekt/out_01_2.png}
+   \caption{8 neuronów}\label{fig:d}
+ \end{subfigure}\\%  
+ \begin{subfigure}[b]{.24\linewidth}
+   \centering
+   \includegraphics[width=.9\textwidth]{projekt/out_01_2.png}
+   \caption{10 neuronów}\label{fig:e}
+ \end{subfigure}%
+  \begin{subfigure}[b]{.24\linewidth}
+   \centering
+   \includegraphics[width=.9\textwidth]{projekt/out_01_2.png}
+   \caption{12 neuronów}\label{fig:f}
+ \end{subfigure}%
+  \begin{subfigure}[b]{.24\linewidth}
+   \centering
+   \includegraphics[width=.9\textwidth]{projekt/out_01_2.png}
+   \caption{20 neuronów}\label{fig:g}
+ \end{subfigure}%
+  \begin{subfigure}[b]{.24\linewidth}
+   \centering
+   \includegraphics[width=.9\textwidth]{projekt/out_01_2.png}
+   \caption{30 neuronów}\label{fig:h}
+ \end{subfigure}\\%    
+ \caption{Kompresja obrazu A dla zestawu treningowego 1} \label{kompresja}
+\end{figure}
+
+\begin{figure}[H]
+ \centering
+ \includegraphics[width=0.9\linewidth]{projekt/chart_01_03.png}
+ \caption{Wykres dla pierwszego eksperymentu}
+ \label{chart_01}
+\end{figure}
+
+\begin{figure}[H]
+ \centering
+ \includegraphics[width=0.9\linewidth]{projekt/chart_02_04.png}
+ \caption{Wykres dla drugiego eksperymentu}
+ \label{chart_02}
+\end{figure}
+
+\begin{figure}[H]
+ \centering
+ \includegraphics[width=0.9\linewidth]{projekt/chart_05_07.png}
+ \caption{Wykres dla trzeciego eksperymentu}
+ \label{chart_03}
+\end{figure}
+
+\begin{figure}[H]
+ \centering
+ \includegraphics[width=0.9\linewidth]{projekt/chart_06_08.png}
+ \caption{Wykres dla czwartego eksperymentu}
+ \label{chart_04}
+\end{figure}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%   BIBLIOGRAFIA
+
+\newpage
+\section{Dyskusja i wnioski}
+
+\subsection{Dyskusja}
+
+Niezależnie od użytych obrazów do wytrenowania sieci, wszystkie z nich zachowywały się podobnie. Obrazy 02 i 05 zawsze cechowały się niską wartością PSNR (która w przypadku obrazu 05 przekroczyła 20 tylko dla najmniejszej kompresji przy treningu na niej samej). Najlepiej zachowywał się obraz 07, który potrafił przekroczyć wartość PSNR. Obrazy nigdy nie przekroczyły bariery 40 - zgadza się to z odczuciem wizualnym, gdyż zawsze można je odróżnić od oryginałów.
+
+\subsection{Wnioski}
+
+\begin{itemize}
+    \item Wybór obrazów do nauki nie wpływa znacznie na jakość kompresji - nauka na danym obrazie wciąż rzadko skutkuje dużo lepszą kompresją pod względem jakości wynikowego obrazka.
+    \item Algorytm w swojej podstawowej wersji potrzebuje wielu iteracji oraz wielu wzorców, by dobrze kompresować obrazy - prosty krok nauki 0,01 może się okazać niewystarczająco dobry przy bardziej skomplikowanych zadaniach, przydatne może się okazać także skorzystanie z innych właściwości MLP.
+    \item Sieci neuronowe okazują się bardzo przydatne przy kompresji obrazów.
+\end{itemize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%   BIBLIOGRAFIA
+
+\newpage
+\renewcommand\refname{Bibliografia}
+\bibliographystyle{plain}
+\bibliography{projekt_bibliografia}
+
+\end{document}

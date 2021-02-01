@@ -1,0 +1,1270 @@
+\documentclass{classrep}
+\usepackage[utf8]{inputenc}
+\frenchspacing
+
+\usepackage{graphicx}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage[hidelinks]{hyperref}
+\usepackage{float}
+\usepackage{setspace}
+\usepackage{amsmath, amssymb, mathtools}
+
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{pdflscape}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%%%%%%%%%% TRYB DRAFTU
+\setkeys{Gin}{draft=True}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\studycycle{Informatyka stosowana, studia dzienne, II st.}
+\coursesemester{II}
+\coursename{Eksploracja danych internetowych}
+\courseyear{2020/2021}
+
+\courseteacher{dr inż. Krzysztof Myszkorowski}
+\coursegroup{poniedziałek, 10:00}
+
+\author{%
+  \studentinfo{Paweł Jeziorski}{234066}\\
+  \studentinfo{Karol Podlewski}{234106}%
+}
+
+\title{Ćwiczenie 2: Analiza atrybutów i klastrowa domen internetowych}
+
+\begin{document}
+\maketitle
+
+\setstretch{1.5}
+
+\tableofcontents
+\setstretch{1.25}
+\newpage
+
+\section{Cel}
+
+Celem zadania było przeprowadzenie analizy klastrowej dokumentów. Badaną domenę należało przekształcić w plik tekstowy zawierający odpowiednie dane.
+Należało przeanalizować atrybuty dokumentów w zależności od reprezentacji i ustawionych parametrów w programie Weka. Następnie należało dokonać klasteryzacji tych dokumentów dla każdego analizowanego przypadku.
+
+Domeny wykorzystane do analizy to:
+\begin{itemize}
+  \item \href{https://ftims.p.lodz.pl}{https://ftims.p.lodz.pl }*
+  \item \href{https://www.uni.lodz.pl}{https://www.uni.lodz.pl }*
+\end{itemize}
+
+
+* ostatni dostęp 19.12.2020
+
+\section{Przygotowanie danych}
+
+    \subsection{Pozyskiwanie danych}
+    
+    WebSphinx to robot internetowy, czyli program, który zbiera informacje o strukturze, stronach i treściach znajdujących się w internecie. Za pomocą tej aplikacji  pobrano strony internetowe do pliku html. 
+
+
+    \begin{figure}[H] 
+    	\begin{center}
+    	\frame{\includegraphics[width=1\textwidth]{zad2/IMG/INNE/plik_html.JPG}}
+        \caption{Fragment pliku html otrzymanego w wyniku pracy programu WebSphinx (https://ftims.p.lodz.pl) }
+    	\end{center}
+    \end{figure}
+    
+    \subsection{Przetworzenie pliku html}
+
+    Otrzymany plik należało oczyścić z elementów charakterystycznych dla formatu html, utrudniających analizę słów. Następnie trzeba było odpowiednio go przekształcić, aby otrzymać plik arff akceptowalny przez program Weka.
+    
+    Do pierwszego etapu użyto krótkiego skryptu w języku Python implementującego bibliotekę html2text. Dzięki temu otrzymano plik w formacie complainText.
+    
+    Kolejny krok dotyczył wyodrębnienia poszczególnych dokumentów z poprzednio uzyskanego pliku i konwersji do formatu arff. W związku z tym przygotowano skrypt w języku Python, który umożliwia pogrupowanie kolejnych podstron i zapisanie ich do pliku. Plik wynikowy wymaga zachowania odpowiedniego schematu, tj. nagłówków oraz atrybutów (Rysunek ~\ref{arff_format})
+ 
+
+    \begin{figure}[H] 
+    	\begin{center}
+    	\frame{\includegraphics[width=1\textwidth]{zad2/IMG/INNE/plain_python.JPG}}
+        \caption{Skrypt grupujący dokumenty i zapisujący je do formaty arff}
+        \label{plain_python}
+    	\end{center}
+    \end{figure}
+
+
+    \begin{figure}[H] 
+    	\begin{center}
+    	\frame{\includegraphics[width=1\textwidth]{zad2/IMG/INNE/arff_format.JPG}}
+        \caption{Zawartość pliku arff}
+        \label{arff_format}
+    	\end{center}
+    \end{figure}
+
+
+\section{Metody przeprowadzonych badań}    
+    
+    \subsection{Wstęp}
+    
+    W przypadku realizacji zapytania związanego z wyszukiwaniem określonych słów znalezienie rzetelnej informacji jest dość trudne. Zazwyczaj lista wynikowa jest znaczących rozmiarów i nie niesie za sobą wielu istotnych wartości. Do przedstawienia miarodajnych rezultatów potrzeba więcej informacji dotyczących badanych dokumentów, takich jak częstotliwość czy miejsce wystąpienia jego składowych. Aby to osiągnąć należy odpowiednio przygotować atrybuty.Formalną reprezentację dokumentów nazywamy termami.
+
+    \subsection{Analiza atrybutów}
+    Aby osiągnąć powyższy cel należy dokonać modyfikacji atrybutów. W obecnej formie każdy z nich jest typu string. Dlatego, pierwszy z nich przekształcono do typy nominalnego. Wykorzystano filtr StringToNominal w programie Weka. W przypadku drugiego atrybutu zastosowano model przestrzeni wektorowej. Przedstawia on dane w postaci wektora w wielowymiarowej przestrzeni. W tym przypadku użyto filtra StringToWordVector. Metoda ta dostarcza wielu możliwych konfiguracji, jednakże na potrzeby eksperymentów wykorzystanych zostanie tylko kilka z nich - TFTransform, IDFTransform czy OutputWordCounts. Zasady działania oraz sposób wykorzystania zostały opisane w dalszej części sprawozdania.
+    
+    \subsection{Klasteryzacja algorytmem EM}
+    Algorytm EM (ang. Expectation–Maximization) nazywany maksymalizacją oczekiwań to iteracyjna metoda szacowania maksymalnego prawdopodobieństwa. Opiera się on na dwóch krokach: wyznacza wartości spodziewane prawdopodobieństwa, a następnie oblicza rozkład parametrów oraz wiarygodność zmiennych. Proces ten trwa tak długo, aż zostanie osiągnięta maksymalna wartość wiarygodności, bądź wynik iteracji się ustabilizuje.
+    
+    Dobrze sprawdza się w analizowanym przypadku ze względu na brak konieczności podawania ilości klastrów.
+    
+\newpage
+
+\section{Wyniki analizy dla domeny ftims}
+    
+     Zaimportowane dane do program Weka, należy przekonwertować do odpowiedniego typu. Do tego celu użyto dwóch, wcześniej wspomnianych filtrów: StringToNominal i StringToWordVector. Na Rysunku ~\ref{arff_format} przedstawiono ustawienia, które pozostaną niezmienne podczas eksperymentów, zaś konfiguracja na Rysunku ~\ref{StringToWordVector_conf} będzie odpowiednio modyfikowana w kolejnych badaniach.
+    
+    \begin{figure}[H] 
+    	\begin{center}
+    	\frame{\includegraphics[width=0.95\textwidth]{zad2/IMG/FTIMS/1String_to_nominal.JPG}}
+        \caption{Konfiguracja filtra StringToNominal dla pierwszego atrybutu (Program Weka)}
+        \label{StringToNominal_conf}
+    	\end{center}
+    \end{figure}
+
+    \begin{figure}[H] 
+    	\begin{center}
+    	\frame{\includegraphics[width=0.95\textwidth]{zad2/IMG/FTIMS/2String_to_WordVector.JPG}}
+        \caption{Konfiguracja filtra StringToWordVector dla drugiego atrybutu (Program Weka)}
+        \label{StringToWordVector_conf}
+    	\end{center}
+    \end{figure}
+
+    \subsection{Analiza atrybutów}
+    \renewcommand{\labelitemi}{$\blacksquare$}
+    
+    \begin{itemize}
+    \item  Przypadek 0.
+    
+    Brak ustawionych parametrów filtra dało wynik w postaci macierzy obecności termów w danym dokumencie (Rysunek ~\ref{FTIMS_3case0_bez_parametrow}). Jeżeli element występuje widnieje wartość '1.0', w przeciwnym wypadku '0.0'.
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 0.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.30\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & false \\
+    StopwordsHandler & false \\
+    TFTransform & false \\
+    IDFTransform & false \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+   
+   
+    \begin{figure}[H] 
+    	\begin{center}
+    	\frame{\includegraphics[width=1\textwidth]{zad2/IMG/FTIMS/3case0_bez_parametrow.JPG}}
+        \caption{Wyniki analizy domeny dla Przypadku 0.}
+        \label{FTIMS_3case0_bez_parametrow}
+    	\end{center}
+    \end{figure}
+
+    \item  Przypadek 1. - outputWordCount
+    
+    Parametr outputWordCount pozwala zliczyć wystąpienia termu w danym dokumencie. Spośród widocznych elementów przedstawionych na Rysunku ~\ref{FTIMS_case1_wordCount}  najczęściej występującym termem jest znak *, tj znak poprzedzający listy. W każdym widocznym dokumencie występuje ponad sto razy. Z kolei najrzadziej występujące to te opatrzone numerem 11 czy 12. Dla każdego prezentowanego dokumnetu widnieje wówczas wartość 0.
+    
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 1.}
+    \resizebox{0.30\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & true \\
+    StopwordsHandler & false \\
+    TFTransform & false \\
+    IDFTransform & false \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+   
+   
+    \begin{figure}[H] 
+    	\begin{center}
+    	\frame{\includegraphics[width=1\textwidth]{zad2/IMG/FTIMS/3case1_WordCount.JPG}}
+        \caption{Wyniki analizy domeny dla Przypadku 1.}
+        \label{FTIMS_case1_wordCount}
+    	\end{center}
+    \end{figure}
+
+
+ \item  Przypadek 2. - Stop lista
+ 
+    Stop lista to lista słów odrzucanych przez wyszukiwarki internetowe uznając je za nieistotne. Są to słowa o małym znaczeniu lub bardzo pospolite, czyli nie wpływające na identyfikację dokumentu.
+    Funkcja StopwordsHandler wykorzystuje wcześniej utworzony plik tekstowy zawierający popularne stop słowa dla języka polskiego. 
+    
+    Link do źródła: https://github.com/bieli/stopwords/blob/master/polish.stopwords.txt [Ostatni dostęp: 19.12.2020]
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 2.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.30\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & false \\
+    StopwordsHandler & true \\
+    TFTransform & false \\
+    IDFTransform & false \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+    
+    Rysunek ~\ref{StopwordsHandler_before} przedstawia statystyki atrybutów przed zastosowaniem mechanizmu StopwordsHandler. Po aktywowaniu tego filtra widać zmianę ilość atrybutów oraz brak wcześniej zaobserwowanego termu ("od")  Rysunek ~\ref{StopwordsHandler_after}.
+   
+    \begin{figure}[H] 
+    	\begin{center}
+    	\frame{\includegraphics[width=1\textwidth]{zad2/IMG/FTIMS/4case2_StopWords_before.JPG}}
+        \caption{Statystki zbioru przed zastosowaniem mechanizmu StopwordsHandler}
+        \label{StopwordsHandler_before}
+    	\end{center}
+    \end{figure}   
+    \begin{figure}[H] 
+    	\begin{center}
+    	\frame{\includegraphics[width=1\textwidth]{zad2/IMG/FTIMS/5case2_StopWords_conf.JPG}}
+        \caption{Ustawienia mechanizmu StopwordsHandler}
+        \label{StopwordsHandler_conf}
+    	\end{center}
+    \end{figure}
+   
+    \begin{figure}[H] 
+    	\begin{center}
+    	\frame{\includegraphics[width=1\textwidth]{zad2/IMG/FTIMS/6case2_StopWords_after.JPG}}
+        \caption{Statystki zbioru po zastosowaniem mechanizmu StopwordsHandler}
+        \label{StopwordsHandler_after}
+    	\end{center}
+    \end{figure}
+
+
+ \item  Przypadek 3. - TFTransform
+    
+    TFTransfor odnosi się do terminu TF (ang. term frequency) oznaczającego częstotliwość wystąpienia danego termu w obrębie dokumentu. Na Rysunku ~\ref{FTIMS_case3_TFT} przedstawiono obliczoną miarę TF.
+    
+    Ten sposób reprezentacji posiada pewne luki. Termy o wysokiej częstotliwości, które występują w wielu dokumentach stają się bezużyteczne przez swoją uniwersalność i powszechność. Jeżeli są obecne w wielu dokumentach powoduje to problemy z ich rozróżnieniem. Stąd ważenie częstością termów wskazuje lokalne znaczenie termów w danym dokumencie.
+    
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 3.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.30\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & false \\
+    StopwordsHandler & false \\
+    TFTransform & true \\
+    IDFTransform & false \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+   
+   
+    \begin{figure}[H] 
+    	\begin{center}
+    	\frame{\includegraphics[width=1\textwidth]{zad2/IMG/FTIMS/case3_TFT.JPG}}
+        \caption{Wyniki analizy domeny dla Przypadku 3.}
+        \label{FTIMS_case3_TFT}
+    	\end{center}
+    \end{figure}
+
+
+     \item  Przypadek 4. - IDFTransform
+        
+    IDFTransform nawiązuje do IDF (ang. inverse document frequency), czyli odwrotna częstość dokumentów. Celem tej transformacji jest uwzględnienie lokalnej częstości termów jak i jego znaczenia w kontekście całej puli dokumentów. Przekłada się to na zmniejszenie wagi termów, które pojawiają się w wielu dokumentach. 
+    
+    Jest to stosunek liczby wszystkich dokumentów do liczby dokumentów zawierający dany term. Oznacza to, że im rzadziej występuje dany term tym większą osiąga wartość IDF.
+    
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 4.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.30\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & false \\
+    StopwordsHandler & false \\
+    TFTransform & false \\
+    IDFTransform & true \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+    
+    Dla termu numer 9., który występował bardzo licznie i w każdym dokumencie (Rysunek ~\ref{FTIMS_case1_wordCount} i ~\ref{FTIMS_case7_StringToNumeric}) wartość IDF jest równa zero.
+    
+    Z kolei term 6. występował licznie, ale w niewielkiej liczbie dokumentów, wtedy wartość IDF jest wysoka (1.91)
+   
+    \begin{figure}[H] 
+    	\begin{center}
+    	\frame{\includegraphics[width=1\textwidth]{zad2/IMG/FTIMS/case4_IDFT.JPG}}
+        \caption{Wyniki analizy domeny dla Przypadku 4.}
+    	\end{center}
+    \end{figure}
+
+
+
+ \item  Przypadek 5. - TFTransform i IDFTransform
+
+    Transformacje TF i IDF można połączyć. Wówczas następuje pomnożenie obu wartości. 
+    
+    Dzięki temu możemy znaleźć termy występujące często w małej liczbie dokumentów (wartości maksymalne) np. term 16 czy 18 (Rysunek ~\ref{FTIMS_case5_IDFT_TFT}). Z kolei niskie wyniki otrzymamy dla tych pojawiających się w prawie każdym dokumencie, tj. term 3 lub 9.
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 5.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.30\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & false \\
+    StopwordsHandler & false \\
+    TFTransform & true \\
+    IDFTransform & true \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+   
+   
+    \begin{figure}[H] 
+    	\begin{center}
+    	\frame{\includegraphics[width=1\textwidth]{zad2/IMG/FTIMS/case5_IDFT_TFT.JPG}}
+        \caption{Wyniki analizy domeny dla Przypadku 5.}
+        \label{FTIMS_case5_IDFT_TFT}
+    	\end{center}
+    \end{figure}
+
+
+ \item  Przypadek 6. - TFTransform, IDFTransform i outputWordCounts
+    
+    Otrzymane wyniki z transformacji TF i IDF są potęgowane przez liczbę wystąpień termów. Efektem jest wyróżnienie wyższymi wartościami tych elementów bardziej pospolitych (term 18 - Dokument 5 i 11 - Rysunek ~\ref{case6_IDFT_TFT_WordCount})
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 6.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.30\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & true \\
+    StopwordsHandler & false \\
+    TFTransform & true \\
+    IDFTransform & true \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+   
+   
+    \begin{figure}[H] 
+    	\begin{center}
+    	\frame{\includegraphics[width=1\textwidth]{zad2/IMG/FTIMS/case6_IDFT_TFT_WordCount.JPG}}
+        \caption{Wyniki analizy domeny dla Przypadku 6.}
+        \label{case6_IDFT_TFT_WordCount}
+    	\end{center}
+    \end{figure}
+
+
+ \item  Przypadek 7. - Reprezentacja binarna
+    
+    Dokument reprezentowany jest przez macierz binarną odpowiadającą wystąpieniu danego termu. Wyniki (Rysunek ~\ref{FTIMS_case7_StringToNumeric}) są tożsame z Rysunkiem ~\ref{FTIMS_3case0_bez_parametrow}, oraz interpretują dane z Rysunku  ~\ref{FTIMS_case1_wordCount}, gdzie dla wartości większych od 0 ustawia "1". Taki sposób reprezentacji może być pomocny przy klasyfikacji dokumentów. W przypadku słów kluczowych nie jest to idealne rozwiązanie. 
+    
+
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 7.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.30\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & false \\
+    StopwordsHandler & false \\
+    TFTransform & false \\
+    IDFTransform & false \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+   
+   
+    \begin{figure}[H] 
+    	\begin{center}
+    	\frame{\includegraphics[width=1\textwidth]{zad2/IMG/FTIMS/case7_StringToNumeric.JPG}}
+        \caption{Wyniki analizy domeny dla Przypadku 7.}
+        \label{FTIMS_case7_StringToNumeric}
+    	\end{center}
+    \end{figure}
+
+
+
+    \end{itemize}
+    
+
+
+
+
+
+    \subsection{Analiza klastrowa}
+    \renewcommand{\labelitemi}{$\blacksquare$}
+    
+    \begin{itemize}
+    \item  Przypadek 0.
+    
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 0.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.30\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & false \\
+    StopwordsHandler & false \\
+    TFTransform & false \\
+    IDFTransform & false \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+   
+    \begin{table}[H]
+    \centering
+    \caption{Wyniki klasteryzacji dla przypadku 0.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.25\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{klaster} & Wartość \\ \midrule
+    0 & 23 (38\%) \\
+    1 & 16 (26\%) \\
+    2 & 22 (36\% \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+    Wartość prawdopodobieństwa : 2587.13578
+
+    \item  Przypadek 1. - outputWordCount
+    
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 1.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.25\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & true \\
+    StopwordsHandler & false \\
+    TFTransform & false \\
+    IDFTransform & false \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+       
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 1.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.25\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Klaster} & Wartość \\ \midrule
+    0 & 44 (72\%) \\
+    1 & 17 (28\%) \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+    Wartość prawdopodobieństwa : -533.66714
+
+ \item  Przypadek 2. - Stop lista
+    
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 2.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.30\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & false \\
+    StopwordsHandler & true \\
+    TFTransform & false \\
+    IDFTransform & false \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+    
+    \begin{table}[H]
+    \centering
+    \caption{Wynik analizy klastrowej dla przypadku 2.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.25\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Klaster} & Wartość \\ \midrule
+    0 & 16 (26\%) \\
+    1 & 22 (36\%) \\
+    2 & 23 (38\%) \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+    Wartość prawdopodobieństwa : 2403.668538
+
+ \item  Przypadek 3. - TFTransform
+    
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 3.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.30\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & false \\
+    StopwordsHandler & false \\
+    TFTransform & true \\
+    IDFTransform & false \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+         
+    \begin{table}[H]
+    \centering
+    \caption{Wynik analizy klastrowej dla przypadku 3.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.25\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Klaster} & Wartość \\ \midrule
+    0 & 16 (26\%) \\
+    1 & 22 (36\%) \\
+    2 & 23 (38\%) \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+    Wartość prawdopodobieństwa : -2920.08239
+
+ \item  Przypadek 4. - IDFTransform
+    
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 4.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.30\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & false \\
+    StopwordsHandler & false \\
+    TFTransform & false \\
+    IDFTransform & true \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+    
+    \begin{table}[H]
+    \centering
+    \caption{Wynik analizy klastrowej dla przypadku 4.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.25\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Klaster} & Wartość \\ \midrule
+    0 & 16 (26\%) \\
+    1 & 22 (36\%) \\
+    2 & 23 (38\%) \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+    Wartość prawdopodobieństwa : 2744.62806
+    
+ \item  Przypadek 5. - TFTransform i IDFTransform
+    
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 5.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.30\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & false \\
+    StopwordsHandler & false \\
+    TFTransform & true \\
+    IDFTransform & true \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+     
+    \begin{table}[H]
+    \centering
+    \caption{Wynik analizy klastrowej dla przypadku 5.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.25\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Klaster} & Wartość \\ \midrule
+    0 & 16 (26\%) \\
+    1 & 22 (36\%) \\
+    2 & 23 (38\%) \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+    Wartość prawdopodobieństwa : 3079.46799
+
+ \item  Przypadek 6. - TFTransform, IDFTransform i outputWordCounts
+    
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 6.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.30\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & true \\
+    StopwordsHandler & false \\
+    TFTransform & true \\
+    IDFTransform & true \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+   
+    \begin{table}[H]
+    \centering
+    \caption{Wynik analizy klastrowej dla przypadku 6.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.25\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Klaster} & Wartość \\ \midrule
+    0 & 44 (72\%) \\
+    1 & 17 (28\%) \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+    Wartość prawdopodobieństwa : 2515.94447
+    
+    
+ \item  Przypadek 7. - Reprezentacja binarna
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 7.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.30\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & false \\
+    StopwordsHandler & false \\
+    TFTransform & false \\
+    IDFTransform & false \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+   
+    \begin{table}[H]
+    \centering
+    \caption{Wynik analizy klastrowej dla przypadku 7.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.25\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Klaster} & Wartość \\ \midrule
+    0 & 4 (7\%) \\
+    1 & 3 (5\%) \\
+    2 & 19 (31\%) \\
+    3 & 19 (31\%) \\
+    4 & 16 (26\%) \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+    Wartość prawdopodobieństwa : -212.27242
+
+    \end{itemize}
+
+    
+\newpage
+\section{Wyniki analizy dla domeny UŁ }
+    \subsection{Analiza atrybutów}
+    \renewcommand{\labelitemi}{$\blacksquare$}
+    
+    \begin{itemize}
+    \item  Przypadek 0.
+    
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 0.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.30\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & false \\
+    StopwordsHandler & false \\
+    TFTransform & false \\
+    IDFTransform & false \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+   
+   
+    \begin{figure}[H] 
+    	\begin{center}
+    	\frame{\includegraphics[width=1\textwidth]{zad2/IMG/UL/Case0_bez_parametrow.JPG}}
+        \caption{Wyniki analizy domeny dla Przypadku 0.}
+    	\end{center}
+    \end{figure}
+
+    \item  Przypadek 1. - outputWordCount
+    
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 1.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.30\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & true \\
+    StopwordsHandler & false \\
+    TFTransform & false \\
+    IDFTransform & false \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+   
+   
+    \begin{figure}[H] 
+    	\begin{center}
+    	\frame{\includegraphics[width=1\textwidth]{zad2/IMG/UL/Case_1_WordCount.JPG}}
+        \caption{Wyniki analizy domeny dla Przypadku 1.}
+    	\end{center}
+    \end{figure}
+
+
+ \item  Przypadek 2. - Stop lista
+    
+    Funkcja StopwordsHandler wykorzystuje wcześniej utworzony plik tekstowy zawierający popularne stop słów dla języka polskiego. 
+    
+    Link do źródła: https://github.com/bieli/stopwords/blob/master/polish.stopwords.txt
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 2.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.30\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & false \\
+    StopwordsHandler & true \\
+    TFTransform & false \\
+    IDFTransform & false \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+   
+    \begin{figure}[H] 
+    	\begin{center}
+    	\frame{\includegraphics[width=1\textwidth]{zad2/IMG/UL/Case_2_WordStop.JPG}}
+        \caption{Wyniki zastosowani mechanizmu StopwordsHandler}
+        \label{StopwordsHandler_before}
+    	\end{center}
+    \end{figure}   
+  
+
+
+ \item  Przypadek 3. - TFTransform
+    
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 3.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.30\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & false \\
+    StopwordsHandler & false \\
+    TFTransform & true \\
+    IDFTransform & false \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+   
+   
+    \begin{figure}[H] 
+    	\begin{center}
+    	\frame{\includegraphics[width=1\textwidth]{zad2/IMG/UL/Case_3_TFT.JPG}}
+        \caption{Wyniki analizy domeny dla Przypadku 3.}
+    	\end{center}
+    \end{figure}
+
+
+ \item  Przypadek 4. - IDFTransform
+    
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 4.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.30\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & false \\
+    StopwordsHandler & false \\
+    TFTransform & false \\
+    IDFTransform & true \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+   
+   
+    \begin{figure}[H] 
+    	\begin{center}
+    	\frame{\includegraphics[width=1\textwidth]{zad2/IMG/UL/Case_4_IDFT.JPG}}
+        \caption{Wyniki analizy domeny dla Przypadku 4.}
+    	\end{center}
+    \end{figure}
+
+
+
+ \item  Przypadek 5. - TFTransform i IDFTransform
+    
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 5.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.30\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & false \\
+    StopwordsHandler & false \\
+    TFTransform & true \\
+    IDFTransform & true \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+   
+   
+    \begin{figure}[H] 
+    	\begin{center}
+    	\frame{\includegraphics[width=1\textwidth]{zad2/IMG/UL/Case_5_TFT_IDFT.JPG}}
+        \caption{Wyniki analizy domeny dla Przypadku 5.}
+    	\end{center}
+    \end{figure}
+
+
+ \item  Przypadek 6. - TFTransform, IDFTransform i outputWordCounts
+    
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 6.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.30\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & true \\
+    StopwordsHandler & false \\
+    TFTransform & true \\
+    IDFTransform & true \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+   
+   
+    \begin{figure}[H] 
+    	\begin{center}
+    	\frame{\includegraphics[width=1\textwidth]{zad2/IMG/UL/Case_6_TFT_IDFT_WordCount.JPG}}
+        \caption{Wyniki analizy domeny dla Przypadku 6.}
+    	\end{center}
+    \end{figure}
+
+
+ \item  Przypadek 7. - Reprezentacja binarna
+    
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 7.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.30\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & false \\
+    StopwordsHandler & false \\
+    TFTransform & false \\
+    IDFTransform & false \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+   
+   
+    \begin{figure}[H] 
+    	\begin{center}
+    	\frame{\includegraphics[width=1\textwidth]{zad2/IMG/UL/Case_7_binary.JPG}}
+        \caption{Wyniki analizy domeny dla Przypadku 7.}
+    	\end{center}
+    \end{figure}
+
+    \end{itemize}
+    
+
+
+
+
+
+    \subsection{Analiza klastrowa}
+    \renewcommand{\labelitemi}{$\blacksquare$}
+    
+    \begin{itemize}
+    \item  Przypadek 0.
+    
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 0.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.30\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & false \\
+    StopwordsHandler & false \\
+    TFTransform & false \\
+    IDFTransform & false \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+   
+    \begin{table}[H]
+    \centering
+    \caption{Wyniki klasteryzacji dla przypadku 0.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.25\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{klaster} & Wartość \\ \midrule
+    0 & 18 (62\%) \\
+    1 & 2 (7\%) \\
+    2 & 2 (7\%) \\
+    3 & 3 (10\%) \\
+    4 & 4 (14\%) \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+    Wartość prawdopodobieństwa : 56.27762
+
+    \item  Przypadek 1. - outputWordCount
+    
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 1.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.30\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & true \\
+    StopwordsHandler & false \\
+    TFTransform & false \\
+    IDFTransform & false \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+       
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 1.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.25\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Klaster} & Wartość \\ \midrule
+    0 & 1 (3\%) \\
+    1 & 2 (10\%) \\
+    2 & 25 (86\%) \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+    Wartość prawdopodobieństwa : -621.09288
+
+ \item  Przypadek 2. - Stop lista
+    
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 2.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.30\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & false \\
+    StopwordsHandler & true \\
+    TFTransform & false \\
+    IDFTransform & false \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+    
+    \begin{table}[H]
+    \centering
+    \caption{Wynik analizy klastrowej dla przypadku 2.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.25\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Klaster} & Wartość \\ \midrule
+    0 & 3 (10\%) \\
+    1 & 22 (76\%) \\
+    2 & 4 (14\%) \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+    Wartość prawdopodobieństwa : -11.73055
+
+ \item  Przypadek 3. - TFTransform
+    
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 3.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.30\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & false \\
+    StopwordsHandler & false \\
+    TFTransform & true \\
+    IDFTransform & false \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+         
+    \begin{table}[H]
+    \centering
+    \caption{Wynik analizy klastrowej dla przypadku 3.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.25\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Klaster} & Wartość \\ \midrule
+    0 & 18 (62\%) \\
+    1 & 2 (7\%) \\
+    2 & 2 (7\%) \\
+    3 & 3 (10\%) \\
+    4 & 4 (14\%) \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+    Wartość prawdopodobieństwa : 552.1696
+
+ \item  Przypadek 4. - IDFTransform
+    
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 4.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.30\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & false \\
+    StopwordsHandler & false \\
+    TFTransform & false \\
+    IDFTransform & true \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+    
+    \begin{table}[H]
+    \centering
+    \caption{Wynik analizy klastrowej dla przypadku 4.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.25\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Klaster} & Wartość \\ \midrule
+    0 & 18 (62\%) \\
+    1 & 2 (7\%) \\
+    2 & 2 (7\%) \\
+    3 & 3 (10\%) \\
+    4 & 4 (14\%) \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+    Wartość prawdopodobieństwa : -855.26944
+    
+ \item  Przypadek 5. - TFTransform i IDFTransform
+    
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 5.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.30\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & false \\
+    StopwordsHandler & false \\
+    TFTransform & true \\
+    IDFTransform & true \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+     
+    \begin{table}[H]
+    \centering
+    \caption{Wynik analizy klastrowej dla przypadku 5.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.25\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Klaster} & Wartość \\ \midrule
+    0 & 18 (62\%) \\
+    1 & 2 (7\%) \\
+    2 & 2 (7\%) \\
+    3 & 3 (10\%) \\
+    4 & 4 (14\%) \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+    Wartość prawdopodobieństwa : -359.37746
+
+ \item  Przypadek 6. - TFTransform, IDFTransform i outputWordCounts
+    
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 6.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.30\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & true \\
+    StopwordsHandler & false \\
+    TFTransform & true \\
+    IDFTransform & true \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+   
+    \begin{table}[H]
+    \centering
+    \caption{Wynik analizy klastrowej dla przypadku 6.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.25\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Klaster} & Wartość \\ \midrule
+    0 & 3 (10\%) \\
+    1 & 21 (72\%) \\
+    2 & 1 (3\%) \\
+    3 & 3 (10\%) \\
+    4 & 1 (3\%) \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+    Wartość prawdopodobieństwa : 226.22116
+
+ \item  Przypadek 7. - Reprezentacja binarna
+    
+    \begin{table}[H]
+    \centering
+    \caption{Parametry zastosowanego filtra StringToWordVector dla przypadku 7.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.30\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Parametr} & Wartość \\ \midrule
+    outputWordCounts & false \\
+    StopwordsHandler & false \\
+    TFTransform & false \\
+    IDFTransform & false \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+   
+    \begin{table}[H]
+    \centering
+    \caption{Wynik analizy klastrowej dla przypadku 7.}
+    \label{tab:apriori_num_params}
+    \resizebox{0.25\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Klaster} & Wartość \\ \midrule
+    0 & 22 (76\%) \\
+    1 & 4 (14\%) \\
+    2 & 3 (10\%) \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+    Wartość prawdopodobieństwa : 226.22116
+
+    \end{itemize}
+    
+
+\section{Dyskusja}
+\subsection{Analiza atrybutów}
+    W przypadku analizy parametrów filtra warto zauważyć, że w trzech przypadkach (Przypadek 0, 1 i 7) wyniki były identyczne, bądź  niosły podobną informację. Reprezentacja binarna jest tożsama dla wyników filtra bezparametrowego i przedstawia macierz obecności termów, przez co przekazują bardzo mało wiadomości. Wyniki z zastosowaniem opcji outputWordCount są rozszerzeniem informacji zawartych w ww. o liczbę wystąpień.
+    
+    Mechanizm TFTransform sprawdza się dużo lepiej w przypadku wykorzystanych przez nas witryn. Pozwala wyciągnąć znacznie więcej wniosków. Jednak posiada pewną wadę. Im częściej dane słowo występuje w tekście tym bardziej traci na wartości, co ma negatywny efekt w przypadku wyszukiwania istotnych dokumentów.
+    
+    IDFTransform pozwoliła na uwiarygodnienie elementów na tle całego zbioru. Im mniejsza liczba dokumentów, które zawierają dany term, tym wyższa wartość IDF.
+    
+    Połączenie obu rozwiązań stanowi bardzo dobre i szeroko stosowane rozwiązanie. Pozwala na odfiltrowanie popularnych terminów.
+    Wysoką wagę TFIDF uzyskuje się dzięki wysokiej częstotliwości termów (w danym dokumencie) i małej częstości występowania tego termu w całym zbiorze dokumentów. Im wyższa liczbowa wartość wagi, tym rzadszy term. Im mniejsza waga, tym bardziej powszechny. 
+    
+    Dzięki słowom o dużej wadze TFIDF, treści zawsze będą znajdować się na szczycie wyników wyszukiwania.
+    
+    \subsection{Analiza klastrowa}
+    Dla każdej z domen można wyróżnić kila rodzajów zbudowanych klastrów. Należy zwrócić uwagę, że kolejne kombinacje TFTransform i IDFTransform dawały identyczne wyniki. Podobna sytuacja nastąpiła dla przypadków 1 i 6, które oba mają aktywną opcję liczenia wystąpień termów.
+
+   
+    \begin{table}[H]
+    \centering
+    \caption{Podsumowanie charakterystyki wyników klastrowania dla domeny https://ftims.p.lodz.pl}
+    \label{tab:apriori_num_params}
+    \resizebox{0.7\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Przypadek testowy} & Charakterystyka klastrów \\ \midrule
+    0, 2, 3, 4, 5  & Trzy równomierne klastry \\
+    1, 6 & Jeden duży, dwa małe \\
+    7 & Łącznie siedem klastrów,  dwa bardzo małe  \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}   
+    
+    \begin{table}[H]
+    \centering
+    \caption{Podsumowanie charakterystyki wyników klastrowania dla domeny https://www.uni.lodz.pl}
+    \label{tab:apriori_num_params}
+    \resizebox{0.7\textwidth}{!}{%
+    \begin{tabular}{@{}lc@{}}
+    \toprule
+    \multicolumn{1}{c}{Przypadek testowy} & Charakterystyka klastrów \\ \midrule
+    0, 3, 4, 5  & Jeden  duży i cztery bardzo małe \\
+    1, 2, 6, 7 & Jeden duży, dwa bardzo małe \\
+    \bottomrule
+    \end{tabular} }
+    \end{table}
+
+
+    Dla pierwszej domeny przeważa podział na trzy klastry. Warto zauważyć, że przypadek 6 połączył dwa z trzech poprzednich klastrów w jeden, przy zachowaniu wysokiej wartości prawdopodobieństwa. Może to oznaczać ze istnieje mała różnica pomiędzy tymi grupami, zaś parametr wordCount był tym przeważającym na korzyść dwóch. W większości przypadków występowała wysoka wartość prawdopodobieństwa (ang. likelihood), parametru algorytmu EM, który mówi: im wyższy tym lepsze dopasowanie modelu. 
+    
+    
+    W przypadku drugiej domeny, w każdym teście istniał klaster, który zawierał ok. 70\% wszystkich obserwacji. Wówczas pozostałe były bardzo małe. 
+    Warto zaznaczyć, że w przypadku tej domeny większość przypadków cechowała niska wartość likelihood.
+
+    \section{Podsumowanie}
+    
+    Wyszukiwarki internetowe wykorzystują wiele technik przeszukiwania sieci w celu znalezienia odpowiednich treści. Dzięki robotom internetowym jesteśmy w stanie zbadać zawartość i strukturę strony. Stosując odpowiednie techniki eksploracji danych możemy przeanalizować każdy dokument - w tym jego elementy, którym możemy nadać etykiety, które zawierają najbardziej istotne i wartościowe informacje. Wykorzystując analizę skupień można wydobyć tematy dokumentów oraz szybko wyszukać i przefiltrować informacje.
+
+\end{document}

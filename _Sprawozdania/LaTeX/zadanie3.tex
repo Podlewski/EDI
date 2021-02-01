@@ -1,0 +1,434 @@
+\documentclass{classrep}
+\usepackage[utf8]{inputenc}
+\frenchspacing
+
+\usepackage{graphicx}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage[hidelinks]{hyperref}
+\usepackage{float}
+\usepackage{setspace}
+\usepackage{amsmath, amssymb, mathtools}
+
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{pdflscape}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%%%%%%%%%% TRYB DRAFTU
+\setkeys{Gin}{draft=True}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\studycycle{Informatyka stosowana, studia dzienne, II st.}
+\coursesemester{II}
+\coursename{Eksploracja danych internetowych}
+\courseyear{2020/2021}
+
+\courseteacher{dr inż. Krzysztof Myszkorowski}
+\coursegroup{poniedziałek, 10:00}
+
+\author{%
+  \studentinfo{Paweł Jeziorski}{234066}\\
+  \studentinfo{Karol Podlewski}{234106}%
+}
+
+\title{Ćwiczenie 3: System rekomendacji}
+
+\begin{document}
+\maketitle
+
+\setstretch{1.5}
+
+\tableofcontents
+\setstretch{1.25}
+\newpage
+
+\section{Cel}
+Celem zadania było zarekomendowanie losowo utworzonemu użytkownikowi stron, które powinien odwiedzić. System znajduje najbardziej podobną mu grupę na podstawie aktywności innych użytkowników. Następnie powinien wskazać strony na które wchodziła większość członków tej grupy.
+
+
+\section{Opis metody}
+Do realizacji zadania wymagany jest zbiór danych zawierający użytkowników i odwiedzone przez nich strony (Źródło danych: \url{ftp://ita.ee.lbl.gov/traces/NASA_access_log_Jul95.gz}). Taka reprezentacja została przygotowana w ramach realizacji zadanie pierwszego i będzie stanowiła podstawę dla systemu rekomendacji.
+\begin{figure}[H] 
+	\begin{center}
+	\frame{\includegraphics[width=0.95\textwidth]{zad3/IMG/EDI1.png}}
+    \caption{Fragment pliku arff zawierającego użytkowników i odwiedzone przez nich strony}
+    \label{StringToNominal_conf}
+	\end{center}
+\end{figure}
+Dane o użytkownikach dzielone są na klastry według odwiedzonych przez nich stron. Do klasteryzacji wykorzystany zostanie program Weka, a algorytmem odpowiedzialnym za analizę skupień będzie metoda \textit{k średnich} \cite{Kmeans}. Wyniki pracy programu stanowią podstawę do wyznaczenia podobieństw i w konsekwencji rekomendacji.
+\begin{figure}[H] 
+	\begin{center}
+	\frame{\includegraphics[width=0.95\textwidth]{zad3/IMG/EDI6.JPG}}
+    \caption{Fragment pliku zawierający wyniki klasteryzacji metodą k średnich za pomocą programu Weka (\textit{numCluster}=5). Stanowi to element wejściowy dla programu rekomendacyjnego. }
+    \label{StringToNominal_conf}
+	\end{center}
+\end{figure}
+
+
+Nowy użytkownik tworzony jest jako wektor zawierający wartości binarne, które reprezentują odwiedzone przez niego poszczególne strony. Każdemu atrybutowi odpowiadającemu jednej stronie przypisana jest losowo wartość \emph{True} lub \emph{False}.
+
+Podobieństwo użytkownika do poszczególnych, utworzonych wcześniej grup,  określane jest na podstawie \emph{współczynnika podobieństwa Jaccarda} \cite{Sim}. Zdefiniowany jest on jako iloraz liczby elementów występujących w obu zbiorach oraz liczby wszystkich elementów:
+
+\[J(A, B) = \frac{|A \cap B|}{|A \cup B|}\]
+gdzie w przypadku proponowanego rozwiązania A to zbiór zawierający strony odwiedzone przez losowego użytkownika, a  B to zbiór zawierający strony odwiedzone przez większość użytkowników danego klastra. Im wyższa wartość współczynnika, tym zbiory są bardziej podobne (wartość równa 1 oznacza, że zbiory są identyczne). 
+
+Posiadając wartości podobieństwa użytkowania do wszystkich badanych klastrów, należy wybrać ten z najwyższą wartością, czyli najbardziej podobny, i wskazać go jako wzór do rekomendacji.
+
+Na jego podstawie wszystkie nieodwiedzone przez użytkownika strony są mu przekazywane jako rekomendacje.
+
+
+\newpage
+\section{Wyniki}    
+Rezultaty zostały podzielone na kilka przypadków, które różnią się liczbą klastrów użytych w algorytmie klasteryzacji. Każdy z nich opisany jest za pomocą tabeli centroidów reprezentujących klaster oraz jego charakterystykę. 
+
+W celu zapewnienia spójności i możliwości porównania poszczególnych przypadków, wygenerowano losowego użytkownika, który będzie brał udział w każdym badanym eksperymencie. 
+\begin{figure}[H] 
+	\begin{center}
+	\frame{\includegraphics[width=0.95\textwidth]{zad3/IMG/EDI2.JPG}}
+    \caption{Losowo wygenerowany użytkownik}
+    \label{StringToNominal_conf}
+	\end{center}
+\end{figure}
+
+
+\newpage
+\subsection{Liczba klastrów - 5}
+\subsubsection{Informacje dotyczące klastrów}
+\begin{table}[H]
+\centering
+\caption{Wynik analizy skupień dla pięciu klastrów}
+\label{tab:apriori_num_params}
+\resizebox{0.25\textwidth}{!}{%
+\begin{tabular}{@{}lc@{}}
+\toprule
+\multicolumn{1}{c}{Klaster} & Wartość \\ \midrule
+1 & 160 (4\%) \\
+2 & 2252 (58\%) \\
+3 & 133 (3\%) \\
+4 & 856 (22\%) \\
+5 & 483 (12\%) \\
+\bottomrule
+\end{tabular} }
+\end{table}
+
+
+    \begin{table}[H]
+    \centering
+    \caption{Wybrane centroidy dla 5 klastrów z flagami stron użytkowników}
+    \label{tab:ses_3clusters_pages}
+    \resizebox{0.7\textwidth}{!}{%
+    \begin{tabular}{@{}lcccc@{}}
+    \toprule
+    \multicolumn{1}{c}{Klaster 1} & Klaster 2 & Klaster 3 & Klaster 4 & Klaster 5  \\ \midrule
+    
+False  &  False  &  False  &   \textbf{True}  &   \textbf{True}\\
+False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &   \textbf{True}\\
+False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False\\
+\textbf{True}  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False\\
+False  &  False  &   \textbf{True}  &  False  &  False\\
+False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False\\
+    \bottomrule
+    \end{tabular}%
+    }
+    \end{table}
+
+
+
+\subsubsection{Rekomendacja}
+Dla wymienionych wyżej klastrów dokonano porównania ich z nowo wygenerowanym użytkownikiem. Najlepiej dopasowane okazały się klastry numer 1 i 4, z wartością współczynnika podobieństwa Jaccarda równą 0.0833. W takich sytuacjach algorytm wybiera pierwszy znaleziony klaster, a więc do kolejnego etapu zostaje wybrany klaster 1.
+
+\begin{table}[H]
+\centering
+\caption{Wartości współczynnika podobieństwa Jaccarda dla nowego użytkownika i każdego klastra}
+\label{tab:apriori_num_params}
+\resizebox{0.25\textwidth}{!}{%
+\begin{tabular}{@{}lc@{}}
+\toprule
+\multicolumn{1}{c}{Klaster} & Wartość J \\ \midrule
+\textbf{1} & \textbf{0.0833} \\
+2 & 0.0000 \\
+3 & 0.0000 \\
+4 & 0.0833 \\
+5 & 0.0769 \\
+\bottomrule
+\end{tabular} }
+\end{table}
+Dla tej konfiguracji algorytm nie zarekomendował żadnej strony.
+
+\newpage
+\subsection{Liczba klastrów - 8}
+\subsubsection{Informacje dotyczące klastrów}
+
+\begin{table}[H]
+\centering
+\caption{Wynik analizy skupień dla ośmiu klastrów.}
+\label{tab:apriori_num_params}
+\resizebox{0.25\textwidth}{!}{%
+\begin{tabular}{@{}lc@{}}
+\toprule
+\multicolumn{1}{c}{Klaster} & Wartość \\ \midrule
+1 & 59 (2\%) \\
+2 & 61 (2\%) \\
+3 & 133 (3\%) \\
+4 & 887 (23\%) \\
+5 & 481 (12\%) \\
+6 & 289 (7\%) \\
+7 & 177 (5\%) \\
+8 & 1797 (46\%) \\
+\bottomrule
+\end{tabular} }
+\end{table}
+
+    \begin{table}[H]
+    \centering
+    \caption{Wybrane centroidy dla 8 klastrów z flagami stron użytkowników}
+    \label{tab:ses_3clusters_pages}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{@{}lccccccc@{}}
+    \toprule
+    \multicolumn{1}{c}{Klaster 1} & Klaster 2 & Klaster 3 & Klaster 4 & Klaster 5 & Klaster 6 & Klaster 7 & Klaster 8  \\ \midrule
+    
+False  &  False  &  False  &   \textbf{True}  &   \textbf{True}  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &   \textbf{True}  &  False  &   \textbf{True}  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &   \textbf{True}  &  False  &  False\\
+\textbf{True}  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+\textbf{True}  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &   \textbf{True}  &  False  &  False  &  False  &  False  &  False\\
+\textbf{True}  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &   \textbf{True}  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+
+    \bottomrule
+    \end{tabular}%
+    }
+    \end{table}
+\newpage
+\subsubsection{Rekomendacja}
+W przypadku ośmiu klastrów najlepszą grupą okazał się klaster numer \textbf{1}. Wartość współczynnika podobieństwa Jaccarda jaką przyjmuje to \textbf{0.1538}.
+
+\begin{table}[H]
+\centering
+\caption{Wartości współczynnika podobieństwa Jaccarda dla nowego użytkownika i każdego klastra}
+\label{tab:apriori_num_params}
+\resizebox{0.25\textwidth}{!}{%
+\begin{tabular}{@{}lc@{}}
+\toprule
+\multicolumn{1}{c}{Klaster} & Wartość J \\ \midrule
+\textbf{1} & \textbf{0.1538} \\
+2 & 0.0000 \\
+3 & 0.0000 \\   
+4 & 0.0833 \\
+5 & 0.0769 \\
+6 & 0.0000 \\   
+7 & 0.0000 \\   
+8 & 0.0000 \\   
+\bottomrule
+\end{tabular} }
+\end{table}
+Dla tej konfiguracji algorytm zarekomendował:
+\begin{itemize}
+  \item /shuttle/countdown/countdown.html
+\end{itemize}
+
+
+\newpage
+\subsection{Liczba klastrów - 13}
+\subsubsection{Informacje dotyczące klastrów}
+
+\begin{table}[H]
+\centering
+\caption{Wynik analizy skupień dla trzynastu klastrów.}
+\label{tab:apriori_num_params}
+\resizebox{0.25\textwidth}{!}{%
+\begin{tabular}{@{}lc@{}}
+\toprule
+\multicolumn{1}{c}{Klaster} & Wartość \\ \midrule
+1 & 58 (1\%) \\
+2 & 61 (2\%) \\
+3 & 133 (3\%) \\
+4 & 834 (21\%) \\
+5 & 389 (10) \\
+6 & 273 (7\%) \\
+7 & 169 (4\%) \\
+8 & 1330 (34\%) \\
+9 & 49 (1\%) \\
+10 & 41 (1\%) \\
+11 & 217 (6\%) \\
+12 & 250 (6\%) \\
+13 & 80 (2\%) \\
+\bottomrule
+\end{tabular} }
+\end{table}
+
+
+    \begin{table}[H]
+    \centering
+    \caption{Wybrane centroidy dla 13 klastrów z flagami stron użytkowników}
+    \label{tab:klaster13}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{@{}lcccccccccccc@{}}
+    \toprule
+    \multicolumn{1}{c}{Klaster 1} & Klaster 2 & Klaster 3 & Klaster 4 & Klaster 5 & Klaster 6 & Klaster 7 & Klaster 8  & Klaster 9  & Klaster 10  & Klaster 11  & Klaster 12 & Klaster 13  \\ \midrule
+    
+False  &  False  &  False  &   \textbf{True}  &   \textbf{True}  &  False  &  False  &  False  &   \textbf{True}  &   \textbf{True}  &  False  &  False  &   \textbf{True}\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &   \textbf{True}  &  False  &  False  &  False  &   \textbf{True}\\
+False  &  False  &  False  &  False  &   \textbf{True}  &  False  &   \textbf{True}  &  False  &   \textbf{True}  &  False  &  False  &  False  &   \textbf{True}\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &   \textbf{True}  &   \textbf{True}\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &   \textbf{True}  &   \textbf{True}  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &   \textbf{True}  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &   \textbf{True}  &  False  &  False  &  False  &   \textbf{True}  &  False  &  False  &  False\\
+\textbf{True}  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+\textbf{True}  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &   \textbf{True}  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &   \textbf{True}  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+\textbf{True}  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &   \textbf{True}  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &   \textbf{True}  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False  &  False\\
+
+
+
+    \bottomrule
+    \end{tabular}%
+    }
+    \end{table}
+
+\newpage
+\subsubsection{Rekomendacja}
+Dla trzynastu klastrów wartości współczynnika podobieństwa Jaccarda są nieco wyższe, a najlepszy z nich wynosi \textbf{0.2143} i jest reprezentowany przez klaster numer \textbf{9}.
+
+\begin{table}[H]
+\centering
+\caption{Wartość współczynnika podobieństwa Jaccarda}
+\label{tab:apriori_num_params}
+\resizebox{0.25\textwidth}{!}{%
+\begin{tabular}{@{}lc@{}}
+\toprule
+\multicolumn{1}{c}{Klaster} & Wartość J \\ \midrule
+1 & 0.1538 \\
+2 & 0.0000 \\
+3 & 0.0000 \\   
+4 & 0.0833 \\
+5 & 0.0769 \\
+6 & 0.0000 \\   
+7 & 0.0000 \\   
+8 & 0.0000 \\   
+\textbf{9} & \textbf{0.2143} \\   
+10 & 0.0000 \\   
+11 & 0.0000 \\   
+12 & 0.0000 \\   
+13 & 0.0667 \\      
+\bottomrule
+\end{tabular} }
+\end{table}
+Algortym zasugerował dwie strony jako rekomendacje dla użytkownika:
+\begin{itemize}
+  \item /shuttle/missions/sts-71/images/images.html
+  \item /shuttle/missions/sts-71/mission-sts-71.html
+\end{itemize}
+
+
+\newpage
+\section{Podsumowanie}
+
+Dla każdego badanego przypadku największy klaster zawsze zawierał wyłącznie wartości \textit{False}. Oznacza to, że większość jego  użytkowników nie odwiedziła żadnej ze stron. Dla pozostałych klastrów dało się zauważyć większą różnorodność, szczególne dla tych z małą liczbą przypadków. W tych klastrach występowało kilka stron, które zostały odwiedzone przez reprezentantów tej grupy. Niemniej jednak były to wciąż pojedyncze przypadki odwiedzin. 
+
+Mała różnorodność spowodowała niskie wartości współczynnika podobieństwa Jaccarda. Zgodnie ze wzorem, część wspólna badanych klastrów i dowolnego nowego użytkownika, w najlepszym przypadku (Tabela \ref{tab:klaster13}, klaster nr 9) stanowi mało liczny zbiór, ponieważ każdy klaster zawiera niewielką liczbę odwiedzonych stron. W konsekwencji otrzymane wyniki podobieństwa Jaccarda dla wszystkich przypadków są niskie (od 0.00 do 0.2143).
+
+Zwiększenie liczby klastrów skutkowało podziałem na małe grupy, w których można było znaleźć więcej odwiedzonych stron. W każdym badanym przypadku nowy użytkownik był przypisywany do mało licznych zbiorów (4\%, 2\% i 1\% wszystkich obserwacji). Przypisane użytkownika do takiego zbioru sugeruje, że odwiedzone przez niego strony cieszą się szczątkową, ale zauważalną popularnością. Istnieje duża szansa, że przy podobnych podziałach wielkościowych klastrów, w przypadku badania obejmującego dużo więcej stron, zaproponowane przez system rekomendacje faktycznie mogą zainteresować użytkownika.
+
+W przypadku bardziej różnorodnej reprezentacji użytkowników efekty działania rekomendacji mogłyby okazać się bogatsze. Jeżeli baza zawiera użytkowników o wysokiej aktywności, odwiedzających różne strony, wówczas klastry reprezentowałyby tę aktywność. Konsekwencją tego byłoby więcej  rekomendowanych stron dla nowych użytkowników.
+
+\newpage
+\begin{thebibliography}{}
+
+    \bibitem{Sim}
+    \textsl{Jaccard Index/Similarity Coefficient, }
+    \author{Stephanie Glen,}
+    \url{ https://www.statisticshowto.com/jaccard-index/}
+    \text{ [dostęp: 02.12.2016]}
+    
+    \bibitem{Kmeans}
+    \textsl{Understanding K-means Clustering in Machine Learning, }
+    \author{Dr. Michael J. Garbade,}
+    \url{https://towardsdatascience.com/understanding-k-means-clustering-in-machine-learning-6a6e67336aa1}
+    \text{ [dostęp: 12.09.2018]}
+    
+\end{thebibliography}
+
+
+
+
+
+
+
+
+
+\end{document}
+
+
+
+
+
